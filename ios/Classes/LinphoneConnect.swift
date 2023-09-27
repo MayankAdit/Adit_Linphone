@@ -48,9 +48,9 @@ class LinphoneConnect
         let configDir = factory.getConfigDir(context: nil)
         try? mCore = factory.createCore(configPath: "\(configDir)/MyConfig", factoryConfigPath: "", systemContext: nil)
         
-        mCore.callkitEnabled = true
+        //mCore.callkitEnabled = true
         mCore.pushNotificationEnabled = true
-        mProviderDelegate = IncomingCallKitDelegate(context: self)
+        //mProviderDelegate = IncomingCallKitDelegate(context: self)
         
         mCore.genericComfortNoiseEnabled = true
         mCore.echoCancellationEnabled = true
@@ -93,7 +93,7 @@ class LinphoneConnect
             self.callMsg = message
             switch state {
             case .OutgoingInit:
-                mProviderDelegate.startOutgoingCall(handle: remoteAddress)
+                //mProviderDelegate.startOutgoingCall(handle: remoteAddress)
                 break;
             case .OutgoingProgress:
                 break;
@@ -125,7 +125,7 @@ class LinphoneConnect
                 if (!self.isCallIncoming) {
                     self.mCall = call
                     self.isCallIncoming = true
-                    self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
+                    //self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
                 }
                 self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 break;
@@ -137,25 +137,25 @@ class LinphoneConnect
             case .End:
                 if(call.dir == .Incoming){
                     if (self.isCallRunning) {
-                        self.mProviderDelegate.stopCall()
+                        //self.mProviderDelegate.stopCall()
                         self.terminateCall()
                     }else {
                         if(call.callLog?.status == .Aborted){
-                            self.mProviderDelegate.stopCall()
+                            //self.mProviderDelegate.stopCall()
                             self.terminateCall()
                         }
                     }
                 } else {
                     if (self.isCallRunning) {
                         self.terminateCall()
-                        self.mProviderDelegate.stopCall()
+                        //self.mProviderDelegate.stopCall()
                     }
                 }
                 self.remoteAddress = "Nobody yet"
                 break;
             case .Error:
                 self.terminateCall()
-                self.mProviderDelegate.stopCall()
+                //self.mProviderDelegate.stopCall()
                 break;
             default:
                 break;
