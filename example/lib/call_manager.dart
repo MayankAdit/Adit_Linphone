@@ -42,12 +42,12 @@ class CallManager {
     //   'phone': phone,
     // };
     callData = {
-      'transportType': 'TCP',
+      'transportType': 'UDP',
       'methodType': connectType,
-      'phone': "3463471545",
+      'phone': phone,
       'username': '101-TelynxPlivoDurby',
       'passwd': '4nWqKPAYprFCv74X',
-      'domain': 'pjsip1.adit.com:65082',
+      'domain': 'pjsip1.adit.com:65080',
       'sipExtention':'@pjsip1.adit.com' 
     };
     aditLinPlugin = AditLinPlugin(connectType, callData);
