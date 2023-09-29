@@ -109,7 +109,7 @@ class MyCallScreenWidget extends State<CallScreenWidget>
     if (_audioMuted) {
       CallManager().connectCall(AppTexts.isUnMuteCallChannel, "3463471545");
     } else {
-      CallManager().connectCall(AppTexts.isMuteCallChannel, "3463471545");
+      CallManager().connectCall(AppTexts.isMuteCallChannel, "3463471545");       
     }
   }
 

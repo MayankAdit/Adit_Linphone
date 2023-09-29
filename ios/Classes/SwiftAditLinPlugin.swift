@@ -60,7 +60,7 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
         if methodType == isOutgoingChannel {
             linphoneConnect.outgoingCall()
         } else if methodType == isHungUpChannel {
-            linphoneConnect.mProviderDelegate.stopCall()
+           // linphoneConnect.mProviderDelegate.stopCall()
             linphoneConnect.terminateCall()
         } else if methodType == isMuteCallChannel {
             linphoneConnect.muteCall()
@@ -80,9 +80,9 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
     
     @objc public func showCallkitIncoming(_ data: String, callName: String, fromPushKit: Bool, completion: @escaping () -> Void) {
         linphoneConnect.incomingCallName = callName
-        linphoneConnect.mProviderDelegate.incomingCall(callID: data) {
-            completion()
-        }
+//        linphoneConnect.mProviderDelegate.incomingCall(callID: data) {
+//            completion()
+//        }
     }
     
     // Register for VoIP notifications

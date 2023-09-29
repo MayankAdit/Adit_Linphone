@@ -41,6 +41,19 @@ class LinphoneConnect
     var counter = 0
     var timer: Timer?
     
+    
+//    String? _callId;
+//      String? _callStatus;
+//      String? _number;
+//      String? _timer;
+//      bool? _isHold;
+//      bool? _isMute;
+//      bool? _isActive;
+//      bool? _isIncoming;
+//      bool? _isConnected;
+//      bool? _isProgress;
+//      String? _startTime;
+    
     init(registery: FlutterPluginRegistrar)
     {
         LoggingService.Instance.logLevel = LogLevel.Debug
@@ -82,6 +95,7 @@ class LinphoneConnect
 
         mCoreDelegate = CoreDelegateStub( onCallStateChanged: { [self] (core: Core, call: Call, state: Call.State, message: String) in
             callbackChannel = FlutterMethodChannel(name: aditcallback, binaryMessenger: registery.messenger())
+            
             let callData = ["callId": call.callLog?.callId ?? "", "callerName": call.callLog?.fromAddress?.displayName ?? "", "state": "\(state)", "duration": call.callLog?.duration ?? 0, "direction": "\(call.dir)"]
             NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message)")
             if(call.dir == .Incoming){
@@ -195,6 +209,7 @@ class LinphoneConnect
             accountParams.registerEnabled = true
             accountParams.pushNotificationAllowed = true
             accountParams.pushNotificationConfig?.provider = "apns.dev"
+            mCore.setUserAgent(name: "LinPhone iOS", version: "0.0.1")
             mCore.configureAudioSession()
             mAccount = try mCore.createAccount(params: accountParams)
             mCore.addAuthInfo(info: authInfo)
