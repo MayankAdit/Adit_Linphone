@@ -17,6 +17,8 @@ class AppTexts {
   static const String isAlreadyLogin = "isAlreadyLogin";
   static const String isPausedChannel = "isPausedChannel";
   static const String isResumChannel = "isResumChannel";
+  static const String isUnregistration = "isUnregistration";
+  static const String isDelete = "isDelete";
 
   /// Initial state for registrations.
   static const String none = "None";
