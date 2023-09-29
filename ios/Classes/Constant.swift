@@ -40,4 +40,6 @@ let isOnSpeakerChannel = "isOnSpeakerChannel"
 let isOffSpeakerChannel = "isOffSpeakerChannel"
 let isPausedChannel = "isPausedChannel"
 let isResumChannel = "isResumChannel"
+let isUnregistration = "isUnregistration"
+let isDelete = "isDelete"
 

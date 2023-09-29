@@ -70,6 +70,10 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
             linphoneConnect.pauseOrResume()
         } else if methodType == isSpeakerChannel {
             linphoneConnect.toggleSpeaker()
+        } else if methodType == isUnregistration {
+            linphoneConnect.unregister()
+        } else if methodType == isDelete {
+            linphoneConnect.delete()
         }
         result("iOS " + UIDevice.current.systemVersion)
     }
