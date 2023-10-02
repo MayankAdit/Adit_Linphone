@@ -57,8 +57,8 @@ class AditLinPlugin {
     }
   }
 
-  Future<bool> call(String phoneNumber) async {
-    return await methodChannel.invokeMethod('isOutgoingChannel', {"recipient": phoneNumber});
+  Future<bool> call(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isOutgoingChannel', callData);
   }
 
   Future<bool> hangup() async {
