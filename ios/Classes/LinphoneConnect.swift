@@ -101,9 +101,7 @@ class LinphoneConnect
                 //mProviderDelegate.startOutgoingCall(handle: remoteAddress)
                 break;
             case .OutgoingProgress:
-                let ext = core.defaultAccount?.contactAddress?.username ?? ""
-                let phoneNumber = call.remoteAddress?.username ?? ""
-                self.sendEvent(eventName: EventRing, body: callObject(call: call))
+                self.sendEvent(eventName: EventRing, body: callObject(callObject: call))
                 break;
             case .OutgoingRinging:
                 break;
@@ -120,15 +118,14 @@ class LinphoneConnect
                     self.timeStartStreamingRunning = Int64(Date().timeIntervalSince1970 * 1000)
                 }
                 self.isPause = false
-                let callId = call.callLog?.callId ?? ""
-                self.sendEvent(eventName: EventUp, body: callObject(call: call))
+                self.sendEvent(eventName: EventUp, body: callObject(callObject: call))
                 break;
             case .Paused:
                 self.isPause = true
-                self.sendEvent(eventName: EventPaused, body: callObject(call: call))
+                self.sendEvent(eventName: EventPaused, body: callObject(callObject: call))
                 break;
             case .Resuming:
-                self.sendEvent(eventName: EventResuming, body: callObject(call: call))
+                self.sendEvent(eventName: EventResuming, body: callObject(callObject: call))
                 break;
             case .PausedByRemote:
                 break;
@@ -145,9 +142,7 @@ class LinphoneConnect
                     self.mCall = call
                     self.isCallIncoming = true
                     //self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
-                    let ext = core.defaultAccount?.contactAddress?.username ?? ""
-                    let phoneNumber = call.remoteAddress?.username ?? ""
-                    self.sendEvent(eventName: EventRing, body: callObject(call: call))
+                    self.sendEvent(eventName: EventRing, body: callObject(callObject: call))
                 }
                 self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 break;
@@ -157,9 +152,7 @@ class LinphoneConnect
                 }
                 if(self.isMissed(callLog: call.callLog)) {
                     NSLog("Missed")
-                    let callee = call.remoteAddress?.username ?? ""
-                    let totalMissed = core.missedCallsCount
-                    self.sendEvent(eventName: EventMissed, body: callObject(call: call))
+                    self.sendEvent(eventName: EventMissed, body: callObject(callObject: call))
                 } else {
                     NSLog("Released")
                 }
@@ -213,9 +206,23 @@ class LinphoneConnect
     }
     
       
-    func callObject(call: Call) -> [String: Any] {
-        let callDataa = ["callId": call.callLog?.callId ?? "", "callStatus": call.callLog?.status.rawValue ?? 0, "number": call.remoteAddress?.username ?? "", "timer": call.duration, "isHold": call.state == .Paused || call.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": call.dir == .Incoming ? true : false, "isConnected": call.state == .Connected ? true : false, "isProgress": call.state == .OutgoingProgress || call.state == .IncomingReceived ? true : false, "startTime": "0", "callState": call.state] as [String : Any]
-        return callDataa
+    func callObject(callObject: Call) -> [String: Any] {
+        do {
+            if(callObject != nil){
+                print("state call -------", callObject.state)
+                let callDataa = ["callId": callObject.callLog?.callId ?? "", "callStatus": callObject.callLog?.status.rawValue ?? 0, "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": "0", "callState": getCallState(call: callObject.state)] as [String : Any]
+                print("state call -------", callDataa)
+                return callDataa
+            } else {
+                print("")
+                return [:]
+            }
+            
+        } catch {
+            NSLog("call object pass ====", error.localizedDescription)
+            return [:]
+        }
+        
     }
     
     //// MARK:  - Login
@@ -538,6 +545,69 @@ class LinphoneConnect
     
     private func isMissed(callLog: CallLog?) -> Bool {
         return (callLog?.dir == Call.Dir.Incoming && callLog?.status == Call.Status.Missed)
+    }
+    
+    func getCallState(){
+        
+    }
+    
+    func getCallState(call: Call.State) -> String {
+        var callState = ""
+        switch call {
+        case .Idle:
+            callState = "CALL_INITIATION"
+            break;
+        case .IncomingReceived:
+            callState = "PROGRESS"
+            break;
+        case .PushIncomingReceived:
+            break;
+        case .OutgoingInit:
+            break;
+        case .OutgoingProgress:
+            callState = "PROGRESS"
+            break;
+        case .OutgoingRinging:
+            break;
+        case .OutgoingEarlyMedia:
+            break;
+        case .Connected:
+            callState = "ACCEPTED"
+            break;
+        case .StreamsRunning:
+            callState = "CONFIRMED"
+            break;
+        case .Pausing:
+            break;
+        case .Paused:
+            break;
+        case .Resuming:
+            break;
+        case .Referred:
+            break;
+        case .Error:
+            break;
+        case .End:
+            callState = "ENDED"
+            break;
+        case .PausedByRemote:
+            break;
+        case .UpdatedByRemote:
+            break;
+        case .IncomingEarlyMedia:
+            break;
+        case .Updating:
+            break;
+        case .Released:
+            break;
+        case .EarlyUpdatedByRemote:
+            break;
+        case .EarlyUpdating:
+            break;
+        default:
+            break;
+        }
+        return callState
     }
 }
 
