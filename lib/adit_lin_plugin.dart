@@ -102,7 +102,7 @@ class AditLinPlugin {
   }
 
   Future<bool> unregisterSipAccount() async {
-    return await methodChannel.invokeMethod('unregisterSipAccount');
+    return await methodChannel.invokeMethod('isUnregistration');
   }
 
   Future<String> getCallId() async {
