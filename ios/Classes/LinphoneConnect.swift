@@ -214,7 +214,7 @@ class LinphoneConnect
     
       
     func callObject(call: Call) -> [String: Any] {
-        let callDataa = ["callId": call.callLog?.callId ?? "", "callStatus": call.callLog?.status.rawValue ?? 0, "number": call.remoteAddress?.username ?? "", "timer": call.duration, "isHold": call.state == .Paused || call.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": call.dir == .Incoming ? true : false, "isConnected": call.state == .Connected ? true : false, "isProgress": call.state == .OutgoingProgress || call.state == .IncomingReceived ? true : false, "startTime": "\(String(describing: call.callLog?.startDate))"] as [String : Any]
+        let callDataa = ["callId": call.callLog?.callId ?? "", "callStatus": call.callLog?.status.rawValue ?? 0, "number": call.remoteAddress?.username ?? "", "timer": call.duration, "isHold": call.state == .Paused || call.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": call.dir == .Incoming ? true : false, "isConnected": call.state == .Connected ? true : false, "isProgress": call.state == .OutgoingProgress || call.state == .IncomingReceived ? true : false, "startTime": "0", "callState": call.state] as [String : Any]
         return callDataa
     }
     
