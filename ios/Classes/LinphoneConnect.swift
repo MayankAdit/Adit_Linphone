@@ -87,8 +87,6 @@ class LinphoneConnect
         mCoreDelegate = CoreDelegateStub( onCallStateChanged: { [self] (core: Core, call: Call, state: Call.State, message: String) in
             callbackChannel = FlutterMethodChannel(name: aditcallback, binaryMessenger: registery.messenger())
             let callData = ["callId": call.callLog?.callId ?? "", "callerName": call.callLog?.fromAddress?.displayName ?? "", "state": "\(state)", "duration": call.callLog?.duration ?? 0, "direction": "\(call.dir)"]
-            
-//            let callDataa = ["callId": call.callLog?.callId ?? "", "callStatus": call.callLog?.status.rawValue ?? 0, "number": call.callLog?.fromAddress?.displayName ?? "", "timer": call.callLog?.duration ?? 0, "isHold": state == .Paused || state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": false, "isIncoming": call.dir == .Incoming ? true : false, "isConnected": state == .Connected ? true : false, "isProgress": false, "startTime": "\(String(describing: call.callLog?.startDate))"]
                         
             NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message)")
 //            if(call.dir == .Incoming){
@@ -105,7 +103,7 @@ class LinphoneConnect
             case .OutgoingProgress:
                 let ext = core.defaultAccount?.contactAddress?.username ?? ""
                 let phoneNumber = call.remoteAddress?.username ?? ""
-                self.sendEvent(eventName: EventRing, body: ["extension": ext, "phoneNumber": phoneNumber, "callType": CallType.outbound.rawValue])
+                self.sendEvent(eventName: EventRing, body: callObject(call: call))
                 break;
             case .OutgoingRinging:
                 break;
@@ -123,14 +121,14 @@ class LinphoneConnect
                 }
                 self.isPause = false
                 let callId = call.callLog?.callId ?? ""
-                self.sendEvent(eventName: EventUp, body: ["callId": callId])
+                self.sendEvent(eventName: EventUp, body: callObject(call: call))
                 break;
             case .Paused:
                 self.isPause = true
-                self.sendEvent(eventName: EventPaused, body: nil)
+                self.sendEvent(eventName: EventPaused, body: callObject(call: call))
                 break;
             case .Resuming:
-                self.sendEvent(eventName: EventResuming, body: nil)
+                self.sendEvent(eventName: EventResuming, body: callObject(call: call))
                 break;
             case .PausedByRemote:
                 break;
@@ -149,7 +147,7 @@ class LinphoneConnect
                     //self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
                     let ext = core.defaultAccount?.contactAddress?.username ?? ""
                     let phoneNumber = call.remoteAddress?.username ?? ""
-                    self.sendEvent(eventName: EventRing, body: ["extension": ext, "phoneNumber": phoneNumber, "callType": CallType.inbound.rawValue])
+                    self.sendEvent(eventName: EventRing, body: callObject(call: call))
                 }
                 self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 break;
@@ -161,7 +159,7 @@ class LinphoneConnect
                     NSLog("Missed")
                     let callee = call.remoteAddress?.username ?? ""
                     let totalMissed = core.missedCallsCount
-                    self.sendEvent(eventName: EventMissed, body: ["phoneNumber": callee, "totalMissed": totalMissed])
+                    self.sendEvent(eventName: EventMissed, body: callObject(call: call))
                 } else {
                     NSLog("Released")
                 }
@@ -213,7 +211,12 @@ class LinphoneConnect
         //mCore.removeDelegate(delegate: mCoreDelegate)
         mCore.addDelegate(delegate: mCoreDelegate)
     }
-        
+    
+      
+    func callObject(call: Call) -> [String: Any] {
+        let callDataa = ["callId": call.callLog?.callId ?? "", "callStatus": call.callLog?.status.rawValue ?? 0, "number": call.remoteAddress?.username ?? "", "timer": call.duration, "isHold": call.state == .Paused || call.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": call.dir == .Incoming ? true : false, "isConnected": call.state == .Connected ? true : false, "isProgress": call.state == .OutgoingProgress || call.state == .IncomingReceived ? true : false, "startTime": "\(String(describing: call.callLog?.startDate))"] as [String : Any]
+        return callDataa
+    }
     
     //// MARK:  - Login
     ///
