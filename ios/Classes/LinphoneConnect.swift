@@ -10,6 +10,7 @@ import AVFoundation
 
 class LinphoneConnect
 {
+    var eventSink: FlutterEventSink?
     var mCore: Core!
     var coreVersion: String = Core.getVersion
     var channel: FlutterMethodChannel? = nil
@@ -41,18 +42,8 @@ class LinphoneConnect
     var counter = 0
     var timer: Timer?
     
-    
-//    String? _callId;
-//      String? _callStatus;
-//      String? _number;
-//      String? _timer;
-//      bool? _isHold;
-//      bool? _isMute;
-//      bool? _isActive;
-//      bool? _isIncoming;
-//      bool? _isConnected;
-//      bool? _isProgress;
-//      String? _startTime;
+    private var timeStartStreamingRunning: Int64 = 0
+    private var isPause: Bool = false
     
     init(registery: FlutterPluginRegistrar)
     {
@@ -95,14 +86,16 @@ class LinphoneConnect
 
         mCoreDelegate = CoreDelegateStub( onCallStateChanged: { [self] (core: Core, call: Call, state: Call.State, message: String) in
             callbackChannel = FlutterMethodChannel(name: aditcallback, binaryMessenger: registery.messenger())
-            
             let callData = ["callId": call.callLog?.callId ?? "", "callerName": call.callLog?.fromAddress?.displayName ?? "", "state": "\(state)", "duration": call.callLog?.duration ?? 0, "direction": "\(call.dir)"]
+            
+//            let callDataa = ["callId": call.callLog?.callId ?? "", "callStatus": call.callLog?.status.rawValue ?? 0, "number": call.callLog?.fromAddress?.displayName ?? "", "timer": call.callLog?.duration ?? 0, "isHold": state == .Paused || state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": false, "isIncoming": call.dir == .Incoming ? true : false, "isConnected": state == .Connected ? true : false, "isProgress": false, "startTime": "\(String(describing: call.callLog?.startDate))"]
+                        
             NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message)")
-            if(call.dir == .Incoming){
-                callbackChannel.invokeMethod(isCallEventChannel, arguments: callData)
-            }else {
-                channel?.invokeMethod(isCallEventChannel, arguments: callData)
-            }
+//            if(call.dir == .Incoming){
+//                callbackChannel.invokeMethod(isCallEventChannel, arguments: callData)
+//            }else {
+//                channel?.invokeMethod(isCallEventChannel, arguments: callData)
+//            }
             incomingCallName = call.callLog?.fromAddress?.displayName ?? ""
             self.callMsg = message
             switch state {
@@ -110,6 +103,9 @@ class LinphoneConnect
                 //mProviderDelegate.startOutgoingCall(handle: remoteAddress)
                 break;
             case .OutgoingProgress:
+                let ext = core.defaultAccount?.contactAddress?.username ?? ""
+                let phoneNumber = call.remoteAddress?.username ?? ""
+                self.sendEvent(eventName: EventRing, body: ["extension": ext, "phoneNumber": phoneNumber, "callType": CallType.outbound.rawValue])
                 break;
             case .OutgoingRinging:
                 break;
@@ -122,8 +118,19 @@ class LinphoneConnect
                 }
                 break;
             case .StreamsRunning:
+                if(!self.isPause) {
+                    self.timeStartStreamingRunning = Int64(Date().timeIntervalSince1970 * 1000)
+                }
+                self.isPause = false
+                let callId = call.callLog?.callId ?? ""
+                self.sendEvent(eventName: EventUp, body: ["callId": callId])
                 break;
             case .Paused:
+                self.isPause = true
+                self.sendEvent(eventName: EventPaused, body: nil)
+                break;
+            case .Resuming:
+                self.sendEvent(eventName: EventResuming, body: nil)
                 break;
             case .PausedByRemote:
                 break;
@@ -140,6 +147,9 @@ class LinphoneConnect
                     self.mCall = call
                     self.isCallIncoming = true
                     //self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
+                    let ext = core.defaultAccount?.contactAddress?.username ?? ""
+                    let phoneNumber = call.remoteAddress?.username ?? ""
+                    self.sendEvent(eventName: EventRing, body: ["extension": ext, "phoneNumber": phoneNumber, "callType": CallType.inbound.rawValue])
                 }
                 self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 break;
@@ -147,28 +157,40 @@ class LinphoneConnect
                 if(call.dir == .Outgoing){
                     self.isCallRunning = false
                 }
+                if(self.isMissed(callLog: call.callLog)) {
+                    NSLog("Missed")
+                    let callee = call.remoteAddress?.username ?? ""
+                    let totalMissed = core.missedCallsCount
+                    self.sendEvent(eventName: EventMissed, body: ["phoneNumber": callee, "totalMissed": totalMissed])
+                } else {
+                    NSLog("Released")
+                }
                 break;
             case .End:
                 if(call.dir == .Incoming){
                     if (self.isCallRunning) {
                         //self.mProviderDelegate.stopCall()
-                        self.terminateCall()
+                       // self.hangup()
                     }else {
                         if(call.callLog?.status == .Aborted){
                             //self.mProviderDelegate.stopCall()
-                            self.terminateCall()
+                           // self.hangup()
                         }
                     }
                 } else {
                     if (self.isCallRunning) {
-                        self.terminateCall()
+                        //self.hangup()
                         //self.mProviderDelegate.stopCall()
                     }
                 }
                 self.remoteAddress = "Nobody yet"
+                let duration = self.timeStartStreamingRunning == 0 ? 0 : Int64(Date().timeIntervalSince1970 * 1000) - self.timeStartStreamingRunning
+                self.sendEvent(eventName: EventHangup, body: ["duration": duration])
+                self.timeStartStreamingRunning = 0
                 break;
             case .Error:
-                self.terminateCall()
+                //self.hangup()
+                self.sendEvent(eventName: EventError, body: ["message": message])
                 //self.mProviderDelegate.stopCall()
                 break;
             default:
@@ -178,7 +200,8 @@ class LinphoneConnect
         }, onAudioDevicesListUpdated: { (core: Core) in
         }, onAccountRegistrationStateChanged: { (core: Core, account: Account, state: RegistrationState, message: String) in
             NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
-            self.channel?.invokeMethod(isRegistrationState, arguments: "\(state)")
+            //self.channel?.invokeMethod(isRegistrationState, arguments: "\(state)")
+            self.sendEvent(eventName: EventAccountRegistrationStateChanged, body: ["registrationState": RegisterSipState.allCases[state.rawValue].rawValue, "message": message])
             if (state == .Ok){
                 self.loggedIn = true
             } else if (state == .Cleared){
@@ -187,6 +210,7 @@ class LinphoneConnect
                 self.loggedIn = false
             }
         })
+        //mCore.removeDelegate(delegate: mCoreDelegate)
         mCore.addDelegate(delegate: mCoreDelegate)
     }
         
@@ -220,13 +244,19 @@ class LinphoneConnect
     
     //// MARK:  - Unregister
     
-    func unregister()
+    func unregister(result: FlutterResult)
     {
         if let account = mCore.defaultAccount {
             let params = account.params
             let clonedParams = params?.clone()
             clonedParams?.registerEnabled = false
             account.params = clonedParams
+            mCore.clearProxyConfig()
+            delete()
+            result(true)
+        } else {
+            NSLog("Sip account not found")
+            result(false)
         }
     }
     
@@ -240,95 +270,160 @@ class LinphoneConnect
         }
     }
     
+    private func createParams(eventName: String, body: [String: Any]?) -> [String:Any] {
+        if body == nil {
+            return [
+                "event": eventName
+            ] as [String: Any]
+        } else {
+            return [
+                "event": eventName,
+                "body": body!
+            ] as [String: Any]
+        }
+    }
+    
+    private func sendEvent(eventName: String, body: [String: Any]?) {
+        let data = createParams(eventName: eventName, body: body)
+        SwiftAditLinPlugin.eventSink?(data)
+    }
+    
     ///MARK:  - Terminate Ringing Call
     
-    func terminateRingingCall() {
+//    func terminateRingingCall() {
+//        do {
+//            if (mCore.callsNb == 0) { return }
+//            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+//            if let call = coreCall {
+//                try call.terminate()
+//            }
+//            if(mCall?.dir == .Incoming){
+//                callbackChannel?.invokeMethod(isRingingCallTerminate, arguments: nil)
+//            } else {
+//                channel?.invokeMethod(isRingingCallTerminate, arguments: nil)
+//            }
+//
+//        } catch { NSLog(error.localizedDescription) }
+//    }
+    
+    func reject(result: FlutterResult) {
         do {
-            if (mCore.callsNb == 0) { return }
-            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
-            if let call = coreCall {
-                try call.terminate()
+            let coreCall = mCore.currentCall
+            if(coreCall == nil) {
+                return result(false)
             }
-            if(mCall?.dir == .Incoming){
-                callbackChannel?.invokeMethod(isRingingCallTerminate, arguments: nil)
-            } else {
-                channel?.invokeMethod(isRingingCallTerminate, arguments: nil)
-            }
-            
-        } catch { NSLog(error.localizedDescription) }
+            try coreCall!.terminate()
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
     }
     
     ///MARK:  - Terminate Call
     
-    func terminateCall() {
+    func hangup(result: FlutterResult) {
+//        do {
+//            try mCore.currentCall?.terminate()
+//        } catch { NSLog(error.localizedDescription) }
+        
         do {
-            try mCore.currentCall?.terminate()
-        } catch { NSLog(error.localizedDescription) }
+            if (mCore.callsNb == 0) {
+                return result(false)
+            }
+            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+            if(coreCall == nil) {
+                return result(false)
+            }
+            try coreCall!.terminate()
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
     }
     
     ///MARK:  -  Call accept
     
-    func acceptCall() {
+    func acceptCall(result: FlutterResult) {
+//        do {
+//            try mCore.currentCall?.accept()
+//        } catch { NSLog(error.localizedDescription) }
+        
         do {
-            try mCore.currentCall?.accept()
-        } catch { NSLog(error.localizedDescription) }
+            let coreCall = mCore.currentCall
+            if(coreCall == nil) {
+                return result(false)
+            }
+            try coreCall!.accept()
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
     }
     
     ///MARK:  -  Mute the current active call
-    func muteCall() {
+    func muteCall(result: FlutterResult) {
         mCore.micEnabled = false
-        if(mCall?.dir == .Incoming){
-            callbackChannel?.invokeMethod(isMuteCallChannel, arguments: nil)
-        } else {
-            channel?.invokeMethod(isMuteCallChannel, arguments: nil)
-        }
+//        if(mCall?.dir == .Incoming){
+//            callbackChannel?.invokeMethod(isMuteCallChannel, arguments: nil)
+//        } else {
+//            channel?.invokeMethod(isMuteCallChannel, arguments: nil)
+//        }
+        result(false)
     }
     
     ///MARK:  - Unmute the current active call
-    func unmuteCall() {
+    func unmuteCall(result: FlutterResult) {
         mCore.micEnabled = true
-        if(mCall?.dir == .Incoming){
-            callbackChannel?.invokeMethod(isUnMuteCallChannel, arguments: nil)
-        } else {
-            channel?.invokeMethod(isUnMuteCallChannel, arguments: nil)
-        }
+//        if(mCall?.dir == .Incoming){
+//            callbackChannel?.invokeMethod(isUnMuteCallChannel, arguments: nil)
+//        } else {
+//            channel?.invokeMethod(isUnMuteCallChannel, arguments: nil)
+//        }
+        result(true)
     }
     
     ///MARK:  -  Speaker On and Off
-    func toggleSpeaker() {
+    func toggleSpeaker(result: FlutterResult) {
         let currentAudioDevice = mCore.currentCall?.outputAudioDevice
         let speakerEnabled = currentAudioDevice?.type == AudioDeviceType.Speaker
         for audioDevice in mCore.audioDevices {
             if (speakerEnabled && audioDevice.type == AudioDeviceType.Microphone) {
                 mCore.currentCall?.outputAudioDevice = audioDevice
                 isSpeakerEnabled = false
-                if(mCall?.dir == .Incoming){
-                    callbackChannel?.invokeMethod(isOffSpeakerChannel, arguments: nil)
-                } else {
-                    channel?.invokeMethod(isOffSpeakerChannel, arguments: nil)
-                }
-                return
+//                if(mCall?.dir == .Incoming){
+//                    callbackChannel?.invokeMethod(isOffSpeakerChannel, arguments: nil)
+//                } else {
+//                    channel?.invokeMethod(isOffSpeakerChannel, arguments: nil)
+//                }
+                return result(false)
             } else if (!speakerEnabled && audioDevice.type == AudioDeviceType.Speaker) {
                 mCore.currentCall?.outputAudioDevice = audioDevice
                 isSpeakerEnabled = true
-                if(mCall?.dir == .Incoming){
-                    callbackChannel?.invokeMethod(isOnSpeakerChannel, arguments: nil)
-                } else {
-                    channel?.invokeMethod(isOnSpeakerChannel, arguments: nil)
-                }
-                return
+//                if(mCall?.dir == .Incoming){
+//                    callbackChannel?.invokeMethod(isOnSpeakerChannel, arguments: nil)
+//                } else {
+//                    channel?.invokeMethod(isOnSpeakerChannel, arguments: nil)
+//                }
+                return result(true)
             }
         }
     }
     
     ///MARK:  - Outgoing call
-    func outgoingCall() {
+    func outgoingCall(result: FlutterResult) {
         do {
             let remoteAddress1 = try Factory.Instance.createAddress(addr: remoteAddress)
             let params = try mCore.createCallParams(call: nil)
             params.mediaEncryption = .None
             let _ = mCore.inviteAddressWithParams(addr: remoteAddress1, params: params)
-        } catch { NSLog(error.localizedDescription) }
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
     }
     
     ///MARK:  - call hold and unhold
@@ -356,16 +451,103 @@ class LinphoneConnect
         } catch { NSLog(error.localizedDescription) }
     }
     
+    func pause(result: FlutterResult) {
+        do {
+            if (mCore.callsNb == 0) {
+                return result(false)
+            }
+            
+            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+            
+            if(coreCall == nil) {
+                return result(false)
+            }
+            // Pause a call
+            try coreCall!.pause()
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
+    }
+    
+    func resume(result: FlutterResult) {
+        do {
+            if (mCore.callsNb == 0) {
+                return result(false)
+            }
+            
+            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+            
+            if(coreCall == nil) {
+                result(false)
+            }
+            // Resume a call
+            try coreCall!.resume()
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
+    }
+    
+    func transfer(recipient: String, result: FlutterResult) {
+        do {
+            if (mCore.callsNb == 0) { return }
+            
+            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+            
+            let domain: String? = mCore.defaultAccount?.params?.domain
+            
+            if (domain == nil) {
+                NSLog("Can't create sip uri")
+                return result(false)
+            }
+            
+            let address = mCore.interpretUrl(url: String("sip:\(recipient)@\(domain!)"))
+            if(address == nil) {
+                NSLog("Can't create address")
+                return result(false)
+            }
+            
+            if(coreCall == nil) {
+                NSLog("Current call not found")
+                result(false)
+            }
+            
+            // Transfer a call
+            try coreCall!.transferTo(referTo: address!)
+            NSLog("Transfer successful")
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
+    }
+    
     //// send DTMF
     ///
-    func sendDTMF(dtmf: String){
+    func sendDTMF(dtmf: String, result: FlutterResult) {
         do {
-            if let cString = dtmf.cString(using: .utf8) {
-              //  try mCore.currentCall?.sendDtmf(dtmf: cString)
-            } else {
-                print("Error converting DTMF tone to C-style string")
+            let coreCall = mCore.currentCall
+            if(coreCall == nil) {
+                NSLog("Current call not found")
+                return result(false)
             }
-        } catch { NSLog(error.localizedDescription) }
+            
+            // Send IVR
+            try coreCall!.sendDtmf(dtmf: dtmf.utf8CString[0])
+            NSLog("Send DTMF successful")
+            result(true)
+            // result("Send DTMF successful")
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        }
+    }
+    
+    private func isMissed(callLog: CallLog?) -> Bool {
+        return (callLog?.dir == Call.Dir.Incoming && callLog?.status == Call.Status.Missed)
     }
 }
 

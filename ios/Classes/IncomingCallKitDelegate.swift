@@ -58,7 +58,7 @@ class IncomingCallKitDelegate : NSObject
         if(linphoneConnect.counter >= 45){
             if(!linphoneConnect.isCallRunning){
                 stopCall()
-                linphoneConnect.terminateCall()
+                //linphoneConnect.hangup()
                 linphoneConnect.counter = 0
             }
             linphoneConnect.timer?.invalidate()
@@ -123,7 +123,7 @@ class IncomingCallKitDelegate : NSObject
         } catch {
             print("Error setting audio route: \(error.localizedDescription)")
         }
-        linphoneConnect.toggleSpeaker()
+       // linphoneConnect.toggleSpeaker()
     }
 }
 
@@ -134,9 +134,9 @@ extension IncomingCallKitDelegate: CXProviderDelegate {
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         if (linphoneConnect.mCall?.state != .End && linphoneConnect.mCall?.state != .Released)  {
             if(!linphoneConnect.isCallRunning){
-                linphoneConnect.terminateRingingCall()
+               // linphoneConnect.reject()
             } else {
-                linphoneConnect.terminateCall()
+               // linphoneConnect.hangup()
             }
         }
         linphoneConnect.isCallRunning = false
@@ -150,7 +150,7 @@ extension IncomingCallKitDelegate: CXProviderDelegate {
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         if(!linphoneConnect.isCallRunning){
             linphoneConnect.mCore.configureAudioSession()
-            linphoneConnect.acceptCall()
+            //linphoneConnect.acceptCall()
             linphoneConnect.callbackChannel?.invokeMethod(isAcceptCallChannel, arguments: nil)
             linphoneConnect.isCallRunning = true
         }
@@ -176,15 +176,15 @@ extension IncomingCallKitDelegate: CXProviderDelegate {
         linphoneConnect.isCallRunning = true
         let isMuted = action.isMuted
         if isMuted {
-            linphoneConnect.muteCall()
+           // linphoneConnect.muteCall()
         } else {
-            linphoneConnect.unmuteCall()
+           // linphoneConnect.unmuteCall()
         }
         action.fulfill()
     }
     func provider(_ provider: CXProvider, perform action: CXPlayDTMFCallAction) {}
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
-        linphoneConnect.terminateRingingCall()
+        //linphoneConnect.reject()
         linphoneConnect.isCallRunning = false
         stopCall()
         action.fulfill()

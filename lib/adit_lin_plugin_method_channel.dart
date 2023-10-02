@@ -8,7 +8,6 @@ class MethodChannelAditLinPlugin {
   
   static final MethodChannelAditLinPlugin instance = MethodChannelAditLinPlugin();
 
-  /// 
   @visibleForTesting
   final methodChannel = const MethodChannel('adit_lin_plugin');
 

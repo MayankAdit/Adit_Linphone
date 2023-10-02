@@ -22,6 +22,7 @@ let sipExtention = "sipExtention"
 
 let aditLinPlugin = "adit_lin_plugin"
 let aditcallback = "aditcallback"
+let aditcallbackEvent = "aditcallbackEvent"
 
 //// MARK: ------- Method channel name
 let isLoginChannel = "isLoginChannel"
@@ -42,4 +43,6 @@ let isPausedChannel = "isPausedChannel"
 let isResumChannel = "isResumChannel"
 let isUnregistration = "isUnregistration"
 let isDelete = "isDelete"
-
+let isRejectCall = "isRejectCall"
+let isTransfer = "isTransfer"
+let isSendDTMF = "isSendDTMF"

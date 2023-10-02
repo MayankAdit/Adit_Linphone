@@ -12,6 +12,8 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
     
     @objc public private(set) static var sharedInstance: SwiftAditLinPlugin!
     
+    static var eventSink: FlutterEventSink?
+    
     init(with registrar: FlutterPluginRegistrar) {
         super.init()
         linphoneConnect = LinphoneConnect(registery: registrar)
@@ -32,6 +34,8 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
         sharedInstance = SwiftAditLinPlugin(with: registrar)
         sharedInstance.channel = channel
         registrar.addMethodCallDelegate(sharedInstance, channel: channel)
+        let eventChannelCallBack = FlutterEventChannel(name: aditcallbackEvent, binaryMessenger: registrar.messenger())
+        eventChannelCallBack.setStreamHandler(sharedInstance)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -58,22 +62,32 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
         linphoneConnect.remoteAddress = "sip:\(linphoneConnect.phone)\(linphoneConnect.sipExtention)"//@pjsip5.adit.com" //@pjsipbeta1.adit.com"
         
         if methodType == isOutgoingChannel {
-            linphoneConnect.outgoingCall()
+            linphoneConnect.outgoingCall(result: result)
         } else if methodType == isHungUpChannel {
            // linphoneConnect.mProviderDelegate.stopCall()
-            linphoneConnect.terminateCall()
+            linphoneConnect.hangup(result: result)
         } else if methodType == isMuteCallChannel {
-            linphoneConnect.muteCall()
+            linphoneConnect.muteCall(result: result)
         } else if methodType == isUnMuteCallChannel {
-            linphoneConnect.unmuteCall()
+            linphoneConnect.unmuteCall(result: result)
         } else if methodType == isHoldAndUnhold {
             linphoneConnect.pauseOrResume()
         } else if methodType == isSpeakerChannel {
-            linphoneConnect.toggleSpeaker()
+            linphoneConnect.toggleSpeaker(result: result)
         } else if methodType == isUnregistration {
-            linphoneConnect.unregister()
+            linphoneConnect.unregister(result: result)
         } else if methodType == isDelete {
             linphoneConnect.delete()
+        } else if methodType == isAcceptCallChannel {
+            linphoneConnect.acceptCall(result: result)
+        } else if methodType == isPausedChannel {
+            linphoneConnect.pause(result: result)
+        } else if methodType == isResumChannel {
+            linphoneConnect.resume(result: result)
+        } else if methodType == isRejectCall {
+            linphoneConnect.reject(result: result)
+        } else if methodType == isTransfer {
+            linphoneConnect.transfer(recipient: linphoneConnect.phone, result: result)
         }
         result("iOS " + UIDevice.current.systemVersion)
     }
@@ -190,3 +204,16 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
 //        completionHandler([.alert, .sound, .badge])
 //    }
 //}
+
+
+extension SwiftAditLinPlugin: FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        SwiftAditLinPlugin.eventSink = events
+        return nil
+    }
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        SwiftAditLinPlugin.eventSink = nil
+        return nil
+    }
+}
