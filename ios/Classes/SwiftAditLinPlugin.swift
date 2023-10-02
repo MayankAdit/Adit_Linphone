@@ -67,9 +67,7 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
            // linphoneConnect.mProviderDelegate.stopCall()
             linphoneConnect.hangup(result: result)
         } else if methodType == isMuteCallChannel {
-            linphoneConnect.muteCall(result: result)
-        } else if methodType == isUnMuteCallChannel {
-            linphoneConnect.unmuteCall(result: result)
+            linphoneConnect.toggleMic(result: result)
         } else if methodType == isHoldAndUnhold {
             linphoneConnect.pauseOrResume()
         } else if methodType == isSpeakerChannel {

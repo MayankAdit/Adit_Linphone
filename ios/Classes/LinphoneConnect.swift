@@ -363,26 +363,13 @@ class LinphoneConnect
         }
     }
     
-    ///MARK:  -  Mute the current active call
-    func muteCall(result: FlutterResult) {
-        mCore.micEnabled = false
-//        if(mCall?.dir == .Incoming){
-//            callbackChannel?.invokeMethod(isMuteCallChannel, arguments: nil)
-//        } else {
-//            channel?.invokeMethod(isMuteCallChannel, arguments: nil)
-//        }
-        result(false)
-    }
-    
-    ///MARK:  - Unmute the current active call
-    func unmuteCall(result: FlutterResult) {
-        mCore.micEnabled = true
-//        if(mCall?.dir == .Incoming){
-//            callbackChannel?.invokeMethod(isUnMuteCallChannel, arguments: nil)
-//        } else {
-//            channel?.invokeMethod(isUnMuteCallChannel, arguments: nil)
-//        }
-        result(true)
+    func toggleMic(result: FlutterResult) {
+        let coreCall = mCore.currentCall
+        if(coreCall == nil) {
+            return result(FlutterError(code: "404", message: "Current call not found", details: nil))
+        }
+        mCore.micEnabled = !mCore.micEnabled
+        result(mCore.micEnabled)
     }
     
     ///MARK:  -  Speaker On and Off

@@ -43,7 +43,7 @@ class AditLinPlugin {
         _eventStreamController.add({'event': SipEvent.Paused});
         break;
       case 'Resuming':
-        _eventStreamController.add({'event': SipEvent.Resuming});
+        _eventStreamController.add({'event': SipEvent.Resuming});       
         break;
       case 'Missed':
         _eventStreamController.add({'event': SipEvent.Missed, 'body': event['body']});
@@ -58,19 +58,19 @@ class AditLinPlugin {
   }
 
   Future<bool> call(String phoneNumber) async {
-    return await methodChannel.invokeMethod('call', {"recipient": phoneNumber});
+    return await methodChannel.invokeMethod('isOutgoingChannel', {"recipient": phoneNumber});
   }
 
   Future<bool> hangup() async {
-    return await methodChannel.invokeMethod('hangup');
+    return await methodChannel.invokeMethod('isHungUpChannel');
   }
 
   Future<bool> answer() async {
-    return await methodChannel.invokeMethod('answer');
+    return await methodChannel.invokeMethod('isAcceptCallChannel');
   }
 
   Future<bool> reject() async {
-    return await methodChannel.invokeMethod('reject');
+    return await methodChannel.invokeMethod('isRejectCall');
   }
 
   Future<bool> transfer(String extension) async {
@@ -78,11 +78,11 @@ class AditLinPlugin {
   }
 
   Future<bool> pause() async {
-    return await methodChannel.invokeMethod('pause');
+    return await methodChannel.invokeMethod('isPausedChannel');
   }
 
   Future<bool> resume() async {
-    return await methodChannel.invokeMethod('resume');
+    return await methodChannel.invokeMethod('isResumChannel');
   }
 
   Future<bool> sendDTMF(String dtmf) async {
