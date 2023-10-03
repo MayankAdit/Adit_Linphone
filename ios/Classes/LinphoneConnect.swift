@@ -176,12 +176,13 @@ class LinphoneConnect
                 }
                 self.remoteAddress = "Nobody yet"
                 let duration = self.timeStartStreamingRunning == 0 ? 0 : Int64(Date().timeIntervalSince1970 * 1000) - self.timeStartStreamingRunning
-                self.sendEvent(eventName: EventHangup, body: ["duration": duration])
+                NSLog("duration", duration)
+                self.sendEvent(eventName: EventHangup, body: callObject(callObject: call))
                 self.timeStartStreamingRunning = 0
                 break;
             case .Error:
                 //self.hangup()
-                self.sendEvent(eventName: EventError, body: ["message": message])
+                self.sendEvent(eventName: EventError, body: callObject(callObject: call))
                 //self.mProviderDelegate.stopCall()
                 break;
             default:
@@ -207,22 +208,9 @@ class LinphoneConnect
     
       
     func callObject(callObject: Call) -> [String: Any] {
-        do {
-            if(callObject != nil){
-                print("state call -------", callObject.state)
-                let callDataa = ["callId": callObject.callLog?.callId ?? "", "callStatus": callObject.callLog?.status.rawValue ?? 0, "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": "0", "callState": getCallState(call: callObject.state)] as [String : Any]
-                print("state call -------", callDataa)
-                return callDataa
-            } else {
-                print("")
-                return [:]
-            }
-            
-        } catch {
-            NSLog("call object pass ====", error.localizedDescription)
-            return [:]
-        }
-        
+        let callDataa = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": "\(timeStartStreamingRunning)", "callState": getCallState(call: callObject.state)] as [String : Any]
+        print("state call -------", callDataa)
+        return callDataa
     }
     
     //// MARK:  - Login
@@ -609,7 +597,35 @@ class LinphoneConnect
         }
         return callState
     }
+    
+    func getCallStatus(status: Call.Status) -> String {
+        var callStatus = ""
+        switch status {
+        case .Success:
+            callStatus = "Success"
+            break;
+        case .Aborted:
+            callStatus = "Aborted"
+            break;
+        case .Missed:
+            callStatus = "Missed"
+            break;
+        case .Declined:
+            callStatus = "Declined"
+            break;
+        case .EarlyAborted:
+            callStatus = "EarlyAborted"
+            break;
+        case .AcceptedElsewhere:
+            callStatus = "AcceptedElsewhere"
+            break;
+        case .DeclinedElsewhere:
+            callStatus = "DeclinedElsewhere"
+            break;
+        default:
+            break;
+        }
+        return callStatus
+    }
 }
-
-
 
