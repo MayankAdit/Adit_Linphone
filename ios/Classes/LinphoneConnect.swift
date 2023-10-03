@@ -208,7 +208,12 @@ class LinphoneConnect
     
       
     func callObject(callObject: Call) -> [String: Any] {
-        let callDataa = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": "\(timeStartStreamingRunning)", "callState": getCallState(call: callObject.state)] as [String : Any]
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd hh:mm:ss"
+        let currentDateTime = Date()
+        let formattedDateTime = dateFormatter.string(from: currentDateTime)
+        print("Current Date and Time: \(formattedDateTime)")
+        let callDataa = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": formattedDateTime, "callState": getCallState(call: callObject.state)] as [String : Any]
         print("state call -------", callDataa)
         return callDataa
     }
