@@ -214,7 +214,7 @@ class LinphoneConnect
         let currentDateTime = Date()
         let formattedDateTime = dateFormatter.string(from: currentDateTime)
         print("Current Date and Time: \(formattedDateTime)")
-        callData = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected || callObject.state == .StreamsRunning ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": formattedDateTime, "callState": getCallState(call: callObject.state)] as [String : Any]
+        callData = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": !mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected || callObject.state == .StreamsRunning ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": formattedDateTime, "callState": getCallState(call: callObject.state)] as [String : Any]
         print("state call -------", callData)
         
         return callData
