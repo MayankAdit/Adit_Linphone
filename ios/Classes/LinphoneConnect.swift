@@ -44,6 +44,7 @@ class LinphoneConnect
     
     private var timeStartStreamingRunning: Int64 = 0
     private var isPause: Bool = false
+    var callData = [String : Any]()
     
     init(registery: FlutterPluginRegistrar)
     {
@@ -86,7 +87,6 @@ class LinphoneConnect
 
         mCoreDelegate = CoreDelegateStub( onCallStateChanged: { [self] (core: Core, call: Call, state: Call.State, message: String) in
             callbackChannel = FlutterMethodChannel(name: aditcallback, binaryMessenger: registery.messenger())
-            let callData = ["callId": call.callLog?.callId ?? "", "callerName": call.callLog?.fromAddress?.displayName ?? "", "state": "\(state)", "duration": call.callLog?.duration ?? 0, "direction": "\(call.dir)"]
                         
             NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message)")
 //            if(call.dir == .Incoming){
@@ -213,9 +213,10 @@ class LinphoneConnect
         let currentDateTime = Date()
         let formattedDateTime = dateFormatter.string(from: currentDateTime)
         print("Current Date and Time: \(formattedDateTime)")
-        let callDataa = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": formattedDateTime, "callState": getCallState(call: callObject.state)] as [String : Any]
-        print("state call -------", callDataa)
-        return callDataa
+        callData = ["callId": callObject.callLog?.callId ?? "", "callStatus": getCallStatus(status: callObject.callLog!.status), "number": callObject.remoteAddress?.username ?? "", "timer": callObject.duration, "isHold": callObject.state == .Paused || callObject.state == .Pausing ? true : false, "isMute": mCore.micEnabled, "isActive": true, "isIncoming": callObject.dir == .Incoming ? true : false, "isConnected": callObject.state == .Connected || callObject.state == .StreamsRunning ? true : false, "isProgress": callObject.state == .OutgoingProgress || callObject.state == .IncomingReceived ? true : false, "startTime": formattedDateTime, "callState": getCallState(call: callObject.state)] as [String : Any]
+        print("state call -------", callData)
+        
+        return callData
     }
     
     //// MARK:  - Login
