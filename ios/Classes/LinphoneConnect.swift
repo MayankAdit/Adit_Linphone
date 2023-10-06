@@ -112,6 +112,7 @@ class LinphoneConnect
                     timer?.invalidate()
                     counter = 0
                 }
+                self.sendEvent(eventName: EventUp, body: callObject(callObject: call))
                 break;
             case .StreamsRunning:
                 if(!self.isPause) {
