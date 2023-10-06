@@ -351,6 +351,7 @@ class LinphoneConnect
     ///MARK:  -  Call accept
     
     func acceptCall(result: FlutterResult) {
+        print("354 accept event call==>");
 //        do {
 //            try mCore.currentCall?.accept()
 //        } catch { NSLog(error.localizedDescription) }
@@ -363,6 +364,7 @@ class LinphoneConnect
             try coreCall!.accept()
             result(true)
         } catch {
+                print("354 accept event call ERROR==>");
             NSLog(error.localizedDescription)
             result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
         }
