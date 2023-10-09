@@ -19,6 +19,8 @@ class AppTexts {
   static const String isResumChannel = "isResumChannel";
   static const String isUnregistration = "isUnregistration";
   static const String isDelete = "isDelete";
+  static const String isTransfer = "isTransfer";
+  static const String isSendDTMF = "isSendDTMF";
 
   /// Initial state for registrations.
   static const String none = "None";
