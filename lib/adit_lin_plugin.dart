@@ -65,8 +65,8 @@ class AditLinPlugin {
     return await methodChannel.invokeMethod('isHungUpChannel');
   }
 
-  Future<bool> answer() async {
-    return await methodChannel.invokeMethod('isAcceptCallChannel');
+  Future<bool> answer(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isAcceptCallChannel', callData);
   }
 
   Future<bool> reject() async {
