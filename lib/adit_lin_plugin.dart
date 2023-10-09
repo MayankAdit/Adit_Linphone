@@ -61,48 +61,48 @@ class AditLinPlugin {
     return await methodChannel.invokeMethod('isOutgoingChannel', callData);
   }
 
-  Future<bool> hangup() async {
-    return await methodChannel.invokeMethod('isHungUpChannel');
+  Future<bool> hangup(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isHungUpChannel', callData);
   }
 
   Future<bool> answer(Map<String, dynamic>? callData) async {
     return await methodChannel.invokeMethod('isAcceptCallChannel', callData);
   }
 
-  Future<bool> reject() async {
-    return await methodChannel.invokeMethod('isRejectCall');
+  Future<bool> reject(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isRejectCall', callData);
   }
 
-  Future<bool> transfer(String extension) async {
-    return await methodChannel.invokeMethod('transfer', {"extension": extension});
+  Future<bool> transfer(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('transfer', callData);
   }
 
-  Future<bool> pause() async {
-    return await methodChannel.invokeMethod('isPausedChannel');
+  Future<bool> pause(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isPausedChannel',callData);
   }
 
-  Future<bool> resume() async {
-    return await methodChannel.invokeMethod('isResumChannel');
+  Future<bool> resume(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isResumChannel', callData);
   }
 
   Future<bool> sendDTMF(String dtmf) async {
     return await methodChannel.invokeMethod('sendDTMF', {"recipient": dtmf});
   }
 
-  Future<bool> toggleSpeaker() async {
-    return await methodChannel.invokeMethod('toggleSpeaker');
+  Future<bool> toggleSpeaker(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('toggleSpeaker', callData);
   }
 
-  Future<bool> toggleMic() async {
-    return await methodChannel.invokeMethod('toggleMic');
+  Future<bool> toggleMic(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('toggleMic', callData);
   }
 
   Future<bool> refreshSipAccount() async {
     return await methodChannel.invokeMethod('refreshSipAccount');
   }
 
-  Future<bool> unregisterSipAccount() async {
-    return await methodChannel.invokeMethod('isUnregistration');
+  Future<bool> unregisterSipAccount(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isUnregistration', callData);
   }
 
   Future<String> getCallId() async {
@@ -117,8 +117,8 @@ class AditLinPlugin {
     return await methodChannel.invokeMethod('getSipRegistrationState');
   }
 
-  Future<bool> isMicEnabled() async {
-    return await methodChannel.invokeMethod('isMicEnabled');
+  Future<bool> isMicEnabled(Map<String, dynamic>? callData) async {
+    return await methodChannel.invokeMethod('isMicEnabled', callData);
   }
 
   Future<bool> isSpeakerEnabled() async {
