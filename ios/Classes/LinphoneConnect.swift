@@ -89,7 +89,7 @@ class LinphoneConnect
             callbackChannel = FlutterMethodChannel(name: aditcallback, binaryMessenger: registery.messenger())
                         
             NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message), calls log\(core.calls)")
-            self.sendEvent(eventName: "callEvents", body: ["body": callsArray(calls: core.calls)])
+            self.sendEvent(eventName: EventReleased, body: ["body": callsArray(calls: core.calls)])
 //            if(call.dir == .Incoming){
 //                callbackChannel.invokeMethod(isCallEventChannel, arguments: callData)
 //            }else {
