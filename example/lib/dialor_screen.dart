@@ -96,14 +96,14 @@ class MyDialPadWidget extends State<DialPadWidget>
 
   void _loadSettings() async {
     _preferences = await SharedPreferences.getInstance();
-    _dest = _preferences.getString('dest') ?? '3463471545';
+    _dest = _preferences.getString('dest') ?? '8324765379';
     _textController = TextEditingController(text: _dest);
     _textController!.text = _dest!;
     var isLogedIn = _preferences.getBool('isLoginChannel');
     if (isLogedIn == false || isLogedIn == null) {
-      CallManager().connectCall(AppTexts.isLoginChannel, "3463471545");
+      CallManager().connectCall(AppTexts.isLoginChannel, "8324765379");
     } else {
-      CallManager().connectCall(AppTexts.isAlreadyLogin, "3463471545");
+      CallManager().connectCall(AppTexts.isAlreadyLogin, "8324765379");
     }
 
     CallManager()

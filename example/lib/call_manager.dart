@@ -33,24 +33,24 @@ class CallManager {
   //EQ6qUCRGLrb7dNZS   8324765379
 
   connectCall(String connectType, String phone) async {
-    // callData = {
-    //   'username': '003-003MayasnkMangukiya9622',
-    //   'passwd': '6L7m7LVBtV5GLNGD',
-    //   'domain': 'pjsipbeta2.adit.com:65080',
-    //   'sipExtention': '@pjsipbeta2.adit.com',
-    //   'transportType': 'UDP',
-    //   'methodType': connectType,
-    //   'phone': phone,
-    // };
     callData = {
+      'username': '003-003MayasnkMangukiya9622',
+      'passwd': '6L7m7LVBtV5GLNGD',
+      'domain': 'pjsipbeta2.adit.com:65080',
+      'sipExtention': '@pjsipbeta2.adit.com',
       'transportType': 'UDP',
       'methodType': connectType,
       'phone': phone,
-      'username': '101-TelynxPlivoDurby',
-      'passwd': '4nWqKPAYprFCv74X',
-      'domain': 'pjsip1.adit.com:65080',
-      'sipExtention':'@pjsip1.adit.com' 
     };
+    // callData = {
+    //   'transportType': 'UDP',
+    //   'methodType': connectType,
+    //   'phone': phone,
+    //   'username': '101-TelynxPlivoDurby',
+    //   'passwd': '4nWqKPAYprFCv74X',
+    //   'domain': 'pjsip1.adit.com:65080',
+    //   'sipExtention':'@pjsip1.adit.com' 
+    // };
     aditLinPlugin = AditLinPlugin(connectType, callData);
     aditLinPlugin?.eventStreamController.stream.listen((event) {
       switch (event['event']) {

@@ -37,14 +37,14 @@ class LinphoneConnect
     /*------------ Callkit tutorial related variables ---------------*/
     var incomingCallName = "Incoming call example"
     var mCall : Call?
-    var mProviderDelegate : IncomingCallKitDelegate!
+   // var mProviderDelegate : IncomingCallKitDelegate!
     var callbackChannel: FlutterMethodChannel!
     var counter = 0
     var timer: Timer?
     
     private var timeStartStreamingRunning: Int64 = 0
     private var isPause: Bool = false
-    var callData = [String : Any]()
+    
     
     init(registery: FlutterPluginRegistrar)
     {
@@ -53,9 +53,9 @@ class LinphoneConnect
         let configDir = factory.getConfigDir(context: nil)
         try? mCore = factory.createCore(configPath: "\(configDir)/MyConfig", factoryConfigPath: "", systemContext: nil)
         
-        //mCore.callkitEnabled = true
+       // mCore.callkitEnabled = true
         mCore.pushNotificationEnabled = true
-        //mProviderDelegate = IncomingCallKitDelegate(context: self)
+      //  mProviderDelegate = IncomingCallKitDelegate(context: self)
         
         mCore.genericComfortNoiseEnabled = true
         mCore.echoCancellationEnabled = true
@@ -88,7 +88,8 @@ class LinphoneConnect
         mCoreDelegate = CoreDelegateStub( onCallStateChanged: { [self] (core: Core, call: Call, state: Call.State, message: String) in
             callbackChannel = FlutterMethodChannel(name: aditcallback, binaryMessenger: registery.messenger())
                         
-            NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message)")
+            NSLog("Call state is \(state) callid : \( call.callLog?.callId ?? "")   message \(message), calls log\(core.calls)")
+            self.sendEvent(eventName: "callEvents", body: ["body": callsArray(calls: core.calls)])
 //            if(call.dir == .Incoming){
 //                callbackChannel.invokeMethod(isCallEventChannel, arguments: callData)
 //            }else {
@@ -98,7 +99,7 @@ class LinphoneConnect
             self.callMsg = message
             switch state {
             case .OutgoingInit:
-                //mProviderDelegate.startOutgoingCall(handle: remoteAddress)
+               // mProviderDelegate.startOutgoingCall(handle: remoteAddress)
                 break;
             case .OutgoingProgress:
                 self.sendEvent(eventName: EventRing, body: callObject(callObject: call))
@@ -142,7 +143,7 @@ class LinphoneConnect
                 if (!self.isCallIncoming) {
                     self.mCall = call
                     self.isCallIncoming = true
-                    //self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
+                   // self.mProviderDelegate.incomingCall(callID: call.callLog?.callId ?? "") {}
                     self.sendEvent(eventName: EventRing, body: callObject(callObject: call))
                 }
                 self.remoteAddress = call.remoteAddress!.asStringUriOnly()
@@ -161,18 +162,18 @@ class LinphoneConnect
             case .End:
                 if(call.dir == .Incoming){
                     if (self.isCallRunning) {
-                        //self.mProviderDelegate.stopCall()
-                       // self.hangup()
+                       // self.mProviderDelegate.stopCall()
+                        self.hangup { r in}
                     }else {
                         if(call.callLog?.status == .Aborted){
                             //self.mProviderDelegate.stopCall()
-                           // self.hangup()
+                            self.hangup { r in}
                         }
                     }
                 } else {
                     if (self.isCallRunning) {
-                        //self.hangup()
-                        //self.mProviderDelegate.stopCall()
+                        self.hangup { r in}
+                       // self.mProviderDelegate.stopCall()
                     }
                 }
                 self.remoteAddress = "Nobody yet"
@@ -182,7 +183,7 @@ class LinphoneConnect
                 self.timeStartStreamingRunning = 0
                 break;
             case .Error:
-                //self.hangup()
+                self.hangup { r in}
                 self.sendEvent(eventName: EventError, body: callObject(callObject: call))
                 //self.mProviderDelegate.stopCall()
                 break;
@@ -194,7 +195,7 @@ class LinphoneConnect
         }, onAccountRegistrationStateChanged: { (core: Core, account: Account, state: RegistrationState, message: String) in
             NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
             //self.channel?.invokeMethod(isRegistrationState, arguments: "\(state)")
-            self.sendEvent(eventName: EventAccountRegistrationStateChanged, body: ["registrationState": RegisterSipState.allCases[state.rawValue].rawValue, "message": message])
+            self.sendEvent(eventName: EventAccountRegistrationStateChanged, body: ["registrationState": self.getRegistrationState(state: state), "message": message])
             if (state == .Ok){
                 self.loggedIn = true
             } else if (state == .Cleared){
@@ -209,6 +210,7 @@ class LinphoneConnect
     
       
     func callObject(callObject: Call) -> [String: Any] {
+        var callData = [String : Any]()
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd hh:mm:ss"
         let currentDateTime = Date()
@@ -218,6 +220,39 @@ class LinphoneConnect
         print("state call -------", callData)
         
         return callData
+    }
+    
+    func convertIntoJSONString(arrayObject: [Any]) -> String? {
+
+            do {
+                let jsonData: Data = try JSONSerialization.data(withJSONObject: arrayObject, options: [])
+                if  let jsonString = NSString(data: jsonData, encoding: String.Encoding.utf8.rawValue) {
+                    return jsonString as String
+                }
+                
+            } catch let error as NSError {
+                print("Array convertIntoJSON - \(error.description)")
+            }
+            return nil
+        }
+    
+    func callsArray(calls: [Call]) -> String {
+        var callData = [String : Any]()
+        var tempCallData = [[String: Any]]()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd hh:mm:ss"
+        let currentDateTime = Date()
+        let formattedDateTime = dateFormatter.string(from: currentDateTime)
+        print("Current Date and Time: \(formattedDateTime)")
+        for i in 0..<calls.count {
+            var data = calls[i]
+            callData = ["callId": data.callLog?.callId ?? "", "callStatus": getCallStatus(status: data.callLog!.status), "number": data.remoteAddress?.username ?? "", "timer": data.duration, "isHold": data.state == .Paused || data.state == .Pausing ? true : false, "isMute": !mCore.micEnabled, "isActive": true, "isIncoming": data.dir == .Incoming ? true : false, "isConnected": data.state == .Connected || data.state == .StreamsRunning ? true : false, "isProgress": data.state == .OutgoingProgress || data.state == .IncomingReceived ? true : false, "startTime": formattedDateTime, "callState": getCallState(call: data.state)] as [String : Any]
+            tempCallData.append(callData)
+        }
+        print("state call -------", callData)
+        var str = convertIntoJSONString(arrayObject: tempCallData)
+        print("call convert string -------", str)
+        return str ?? ""
     }
     
     //// MARK:  - Login
@@ -634,6 +669,33 @@ class LinphoneConnect
             break;
         }
         return callStatus
+    }
+    
+    func getRegistrationState(state: RegistrationState) -> String {
+        var registrationState = ""
+        switch state {
+        case .None:
+            registrationState = "None"
+            break;
+        case .Progress:
+            registrationState = "Progress"
+            break;
+        case .Ok:
+            registrationState = "Ok"
+            break;
+        case .Failed:
+            registrationState = "Failed"
+            break;
+        case .Cleared:
+            registrationState = "Cleared"
+            break;
+        case .Refreshing:
+            registrationState = "Refreshing"
+            break;
+        default:
+            break;
+        }
+        return registrationState
     }
 }
 
