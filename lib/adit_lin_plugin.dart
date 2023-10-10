@@ -54,6 +54,9 @@ class AditLinPlugin {
       case 'Error':
         _eventStreamController.add({'event': SipEvent.Error, 'body': event['body']});
         break;
+      case 'callEvent':
+        _eventStreamController.add({'event': "callEvent", 'body': event['body']});
+        break;
     }
   }
 
