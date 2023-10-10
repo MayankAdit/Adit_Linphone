@@ -47,6 +47,7 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
         let methodType = args[methodType] as? String
         let phone = args[phone] as? String
         let sipExtention = args[sipExtention] as? String
+        let callerId = args[callerID] as? String
         linphoneConnect.username = userName ?? ""
         linphoneConnect.passwd = password ?? ""
         linphoneConnect.domain = domain ?? ""
@@ -65,7 +66,7 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
             linphoneConnect.outgoingCall(result: result)
         } else if methodType == isHungUpChannel {
            // linphoneConnect.mProviderDelegate.stopCall()
-            linphoneConnect.hangup(result: result)
+            linphoneConnect.hangup(result: result, callerID: callerId ?? "")
         } else if methodType == isMuteCallChannel {
             linphoneConnect.toggleMic(result: result)
         } else if methodType == isHoldAndUnhold {
@@ -77,7 +78,7 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
         } else if methodType == isDelete {
             linphoneConnect.delete()
         } else if methodType == isAcceptCallChannel {
-            linphoneConnect.acceptCall(result: result)
+            linphoneConnect.acceptCall(result: result, callerID: callerId ?? "")
         } else if methodType == isPausedChannel {
             linphoneConnect.pause(result: result)
         } else if methodType == isResumChannel {

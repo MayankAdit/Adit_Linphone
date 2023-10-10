@@ -58,7 +58,7 @@ class IncomingCallKitDelegate : NSObject
         if(linphoneConnect.counter >= 45){
             if(!linphoneConnect.isCallRunning){
                 stopCall()
-                linphoneConnect.hangup { result in}
+               // linphoneConnect.hangup { result in}
                 linphoneConnect.counter = 0
             }
             linphoneConnect.timer?.invalidate()
@@ -136,7 +136,7 @@ extension IncomingCallKitDelegate: CXProviderDelegate {
             if(!linphoneConnect.isCallRunning){
                 linphoneConnect.reject { result in}
             } else {
-                linphoneConnect.hangup { result in}
+              //  linphoneConnect.hangup { result in}
             }
         }
         linphoneConnect.isCallRunning = false
@@ -150,7 +150,7 @@ extension IncomingCallKitDelegate: CXProviderDelegate {
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         if(!linphoneConnect.isCallRunning){
             linphoneConnect.mCore.configureAudioSession()
-            linphoneConnect.acceptCall { result in}
+            //linphoneConnect.acceptCall { result in}
             linphoneConnect.callbackChannel?.invokeMethod(isAcceptCallChannel, arguments: nil)
             linphoneConnect.isCallRunning = true
         }

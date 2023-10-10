@@ -163,16 +163,19 @@ class LinphoneConnect
                 if(call.dir == .Incoming){
                     if (self.isCallRunning) {
                        // self.mProviderDelegate.stopCall()
-                        self.hangup { r in}
+                        self.hangup(result: { r in
+                        }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                     }else {
                         if(call.callLog?.status == .Aborted){
                             //self.mProviderDelegate.stopCall()
-                            self.hangup { r in}
+                            self.hangup(result: { r in
+                            }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                         }
                     }
                 } else {
                     if (self.isCallRunning) {
-                        self.hangup { r in}
+                        self.hangup(result: { r in
+                        }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                        // self.mProviderDelegate.stopCall()
                     }
                 }
@@ -183,7 +186,8 @@ class LinphoneConnect
                 self.timeStartStreamingRunning = 0
                 break;
             case .Error:
-                self.hangup { r in}
+                self.hangup(result: { r in
+                }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                 self.sendEvent(eventName: EventError, body: callObject(callObject: call))
                 //self.mProviderDelegate.stopCall()
                 break;
@@ -363,44 +367,64 @@ class LinphoneConnect
     
     ///MARK:  - Terminate Call
     
-    func hangup(result: FlutterResult) {
+    func hangup(result: FlutterResult, callerID: String) {
 //        do {
 //            try mCore.currentCall?.terminate()
 //        } catch { NSLog(error.localizedDescription) }
-        
-        do {
-            if (mCore.callsNb == 0) {
-                return result(false)
+        var getCall = mCore.getCallByCallid(callId: callerID)
+        if(getCall != nil){
+            do {
+                try getCall!.terminate()
+                result(true)
+            } catch {
+                NSLog(error.localizedDescription)
+                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
             }
-            let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
-            if(coreCall == nil) {
-                return result(false)
+        } else {
+            do {
+                if (mCore.callsNb == 0) {
+                    return result(false)
+                }
+                let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+                if(coreCall == nil) {
+                    return result(false)
+                }
+                try coreCall!.terminate()
+                result(true)
+            } catch {
+                NSLog(error.localizedDescription)
+                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
             }
-            try coreCall!.terminate()
-            result(true)
-        } catch {
-            NSLog(error.localizedDescription)
-            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
         }
     }
     
     ///MARK:  -  Call accept
     
-    func acceptCall(result: FlutterResult) {
+    func acceptCall(result: FlutterResult, callerID: String) {
 //        do {
 //            try mCore.currentCall?.accept()
 //        } catch { NSLog(error.localizedDescription) }
-        
-        do {
-            let coreCall = mCore.currentCall
-            if(coreCall == nil) {
-                return result(false)
+        var getCall = mCore.getCallByCallid(callId: callerID)
+        if(getCall != nil){
+            do {
+                try getCall!.accept()
+                result(true)
+            } catch {
+                NSLog(error.localizedDescription)
+                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
             }
-            try coreCall!.accept()
-            result(true)
-        } catch {
-            NSLog(error.localizedDescription)
-            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+        } else {
+            do {
+                let coreCall = mCore.currentCall
+                if(coreCall == nil) {
+                    return result(false)
+                }
+                try coreCall!.accept()
+                result(true)
+            } catch {
+                NSLog(error.localizedDescription)
+                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+            }
         }
     }
     
