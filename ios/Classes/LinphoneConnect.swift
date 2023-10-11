@@ -405,28 +405,39 @@ class LinphoneConnect
 //        do {
 //            try mCore.currentCall?.accept()
 //        } catch { NSLog(error.localizedDescription) }
-        var getCall = mCore.getCallByCallid(callId: callerID)
-        print("get accept Call -------- ", getCall)
-        if(getCall != nil){
-            do {
-                try getCall!.accept()
-                result(true)
-            } catch {
-                NSLog(error.localizedDescription)
-                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+//        var getCall = mCore.getCallByCallid(callId: callerID)
+//        print("get accept Call -------- ", getCall)
+//        if(getCall != nil){
+//            do {
+//                try getCall!.accept()
+//                result(true)
+//            } catch {
+//                NSLog(error.localizedDescription)
+//                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+//            }
+//        } else {
+//            do {
+//                let coreCall = mCore.currentCall
+//                if(coreCall == nil) {
+//                    return result(false)
+//                }
+//                try coreCall!.accept()
+//                result(true)
+//            } catch {
+//                NSLog(error.localizedDescription)
+//                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
+//            }
+//        }
+        do {
+            let coreCall = mCore.currentCall
+            if(coreCall == nil) {
+                return result(false)
             }
-        } else {
-            do {
-                let coreCall = mCore.currentCall
-                if(coreCall == nil) {
-                    return result(false)
-                }
-                try coreCall!.accept()
-                result(true)
-            } catch {
-                NSLog(error.localizedDescription)
-                result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
-            }
+            try coreCall!.accept()
+            result(true)
+        } catch {
+            NSLog(error.localizedDescription)
+            result(FlutterError(code: "500", message: error.localizedDescription, details: nil))
         }
     }
     
