@@ -372,6 +372,7 @@ class LinphoneConnect
 //            try mCore.currentCall?.terminate()
 //        } catch { NSLog(error.localizedDescription) }
         var getCall = mCore.getCallByCallid(callId: callerID)
+        print("get hangup Call -------- ", getCall)
         if(getCall != nil){
             do {
                 try getCall!.terminate()
@@ -405,6 +406,7 @@ class LinphoneConnect
 //            try mCore.currentCall?.accept()
 //        } catch { NSLog(error.localizedDescription) }
         var getCall = mCore.getCallByCallid(callId: callerID)
+        print("get accept Call -------- ", getCall)
         if(getCall != nil){
             do {
                 try getCall!.accept()

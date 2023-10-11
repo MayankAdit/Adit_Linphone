@@ -48,6 +48,7 @@ public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
         let phone = args[phone] as? String
         let sipExtention = args[sipExtention] as? String
         let callerId = args[callerID] as? String
+        print("get caller id --------", callerId)
         linphoneConnect.username = userName ?? ""
         linphoneConnect.passwd = password ?? ""
         linphoneConnect.domain = domain ?? ""
