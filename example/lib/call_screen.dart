@@ -8,25 +8,25 @@ import 'package:adit_lin_plugin_example/call_data_model.dart';
 import 'package:adit_lin_plugin_example/call_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sip_ua/sip_ua.dart';
+//import 'package:sip_ua/sip_ua.dart';
 
 // ignore: must_be_immutable
 class CallScreenWidget extends StatefulWidget {
-  final SIPUAHelper? _helper;
-  const CallScreenWidget(this._helper, {Key? key}) : super(key: key);
+ // final SIPUAHelper? _helper;
+  const CallScreenWidget({Key? key}) : super(key: key);
   @override
   MyCallScreenWidget createState() => MyCallScreenWidget();
 }
 
 class MyCallScreenWidget extends State<CallScreenWidget>
-    implements SipUaHelperListener {
+     {
   bool _showNumPad = false;
   String _timeLabel = 'Ringing...';
   late Timer _timer;
   bool _audioMuted = false;
   bool _speakerOn = false;
   bool _hold = false;
-  SIPUAHelper? get helper => widget._helper;
+ // SIPUAHelper? get helper => widget._helper;
 
   CallDataModel? get call => CallManager().call;
 
@@ -37,7 +37,7 @@ class MyCallScreenWidget extends State<CallScreenWidget>
   @override
   initState() {
     super.initState();
-    helper!.addSipUaHelperListener(this);
+    //helper!.addSipUaHelperListener(this);
     CallManager()
         .aditLinPlugin
         ?.methodChannel
@@ -60,7 +60,7 @@ class MyCallScreenWidget extends State<CallScreenWidget>
   @override
   deactivate() {
     super.deactivate();
-    helper!.removeSipUaHelperListener(this);
+    //helper!.removeSipUaHelperListener(this);
   }
 
   void _startTimer() {
@@ -78,14 +78,14 @@ class MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-  @override
-  void callStateChanged(Call call, CallState callState) {}
+  // @override
+  // void callStateChanged(Call call, CallState callState) {}
 
-  @override
-  void transportStateChanged(TransportState state) {}
+  // @override
+  // void transportStateChanged(TransportState state) {}
 
-  @override
-  void registrationStateChanged(RegistrationState state) {}
+  // @override
+  // void registrationStateChanged(RegistrationState state) {}
 
   void _handleHangup() {
     if (_timeLabel != 'Ringing...') {
@@ -418,11 +418,11 @@ class MyCallScreenWidget extends State<CallScreenWidget>
             child: SizedBox(width: 320, child: _buildActionButtons())));
   }
 
-  @override
-  void onNewMessage(SIPMessageRequest msg) {}
+  // @override
+  // void onNewMessage(SIPMessageRequest msg) {}
 
-  @override
-  void onNewNotify(Notify ntf) {}
+  // @override
+  // void onNewNotify(Notify ntf) {}
 
   /// MARK: --- Outgoing ------
 

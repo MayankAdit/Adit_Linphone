@@ -6,19 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sip_ua/sip_ua.dart';
+//import 'package:sip_ua/sip_ua.dart';
 
 class DialPadWidget extends StatefulWidget {
-  final SIPUAHelper? _helper;
-  const DialPadWidget(this._helper, {Key? key}) : super(key: key);
+  // final SIPUAHelper? _helper;
+  const DialPadWidget({Key? key}) : super(key: key);
   @override
   MyDialPadWidget createState() => MyDialPadWidget();
 }
 
 Map<String, dynamic>? callData;
 
-class MyDialPadWidget extends State<DialPadWidget>
-    implements SipUaHelperListener {
+class MyDialPadWidget extends State<DialPadWidget> {
 //// handle outGoing
   Future<dynamic> _handleMethod(MethodCall methodCall) async {
     switch (methodCall.method) {
@@ -80,7 +79,7 @@ class MyDialPadWidget extends State<DialPadWidget>
   }
 
   String? _dest;
-  SIPUAHelper? get helper => widget._helper;
+  //SIPUAHelper? get helper => widget._helper;
   TextEditingController? _textController;
   late SharedPreferences _preferences;
   String? receivedMsg;
@@ -118,7 +117,7 @@ class MyDialPadWidget extends State<DialPadWidget>
   }
 
   void _bindEventListeners() {
-    helper!.addSipUaHelperListener(this);
+    //helper!.addSipUaHelperListener(this);
   }
 
   void _handleBackSpace([bool deleteAll = false]) {
@@ -251,26 +250,26 @@ class MyDialPadWidget extends State<DialPadWidget>
                 ])));
   }
 
-  @override
-  void registrationStateChanged(RegistrationState state) {
-    setState(() {});
-  }
+  // @override
+  // void registrationStateChanged(RegistrationState state) {
+  //   setState(() {});
+  // }
 
-  @override
-  void transportStateChanged(TransportState state) {}
+  // @override
+  // void transportStateChanged(TransportState state) {}
 
-  @override
-  void callStateChanged(Call call, CallState callState) {}
+  // @override
+  // void callStateChanged(Call call, CallState callState) {}
 
-  @override
-  void onNewMessage(SIPMessageRequest msg) {
-    //Save the incoming message to DB
-    String? msgBody = msg.request.body as String?;
-    setState(() {
-      receivedMsg = msgBody;
-    });
-  }
+  // @override
+  // void onNewMessage(SIPMessageRequest msg) {
+  //   //Save the incoming message to DB
+  //   String? msgBody = msg.request.body as String?;
+  //   setState(() {
+  //     receivedMsg = msgBody;
+  //   });
+  // }
 
-  @override
-  void onNewNotify(Notify ntf) {}
+  // @override
+  // void onNewNotify(Notify ntf) {}
 }

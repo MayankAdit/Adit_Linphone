@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,8 +11,6 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		5110611E2ABC407F008A69C9 /* libmsbcg729.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 51F73CC92AB8796900073D54 /* libmsbcg729.a */; };
 		512B88E22A6FEECB00261459 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 512B88E12A6FEECB00261459 /* GoogleService-Info.plist */; };
-		517F28E22A84ACBE00619447 /* CallKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51AB1D4C2A7A630E0047AD4E /* CallKit.framework */; };
-		517F28E42A84C52400619447 /* PushKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 517F28E32A84C52400619447 /* PushKit.framework */; };
 		517F28E62A84C52C00619447 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 517F28E52A84C52C00619447 /* AVFoundation.framework */; };
 		517F28E82A84C53200619447 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 517F28E72A84C53200619447 /* AudioToolbox.framework */; };
 		51D67ECE2ABD5B1900023AF8 /* Audio.plist in Resources */ = {isa = PBXBuildFile; fileRef = 51D67ECD2ABD5B1900023AF8 /* Audio.plist */; };
@@ -73,8 +71,6 @@
 				B842D0D57DADA95C3AD625F3 /* Pods_Runner.framework in Frameworks */,
 				517F28E82A84C53200619447 /* AudioToolbox.framework in Frameworks */,
 				5110611E2ABC407F008A69C9 /* libmsbcg729.a in Frameworks */,
-				517F28E22A84ACBE00619447 /* CallKit.framework in Frameworks */,
-				517F28E42A84C52400619447 /* PushKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,6 +392,7 @@
 					HAVE_G729,
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -539,6 +536,7 @@
 					HAVE_G729,
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -576,6 +574,7 @@
 					HAVE_G729,
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

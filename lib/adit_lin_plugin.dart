@@ -17,7 +17,7 @@ class AditLinPlugin {
 
    static const EventChannel eventChannel = EventChannel('aditcallbackEvent');
    static Stream broadcastStream = eventChannel.receiveBroadcastStream();
-
+      
    final StreamController<dynamic> _eventStreamController = StreamController.broadcast();
 
   StreamController<dynamic> get eventStreamController => _eventStreamController;
