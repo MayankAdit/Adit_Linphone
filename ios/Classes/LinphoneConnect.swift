@@ -162,20 +162,21 @@ class LinphoneConnect
             case .End:
                 if(call.dir == .Incoming){
                     if (self.isCallRunning) {
+                   ////  MARK: - We are managing from callkit
                        // self.mProviderDelegate.stopCall()
-                        self.hangup(result: { r in
-                        }, callerID: mCore.currentCall?.callLog?.callId ?? "")
+//                        self.hangup(result: { r in
+//                        }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                     }else {
                         if(call.callLog?.status == .Aborted){
                             //self.mProviderDelegate.stopCall()
-                            self.hangup(result: { r in
-                            }, callerID: mCore.currentCall?.callLog?.callId ?? "")
+//                            self.hangup(result: { r in
+//                            }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                         }
                     }
                 } else {
                     if (self.isCallRunning) {
-                        self.hangup(result: { r in
-                        }, callerID: mCore.currentCall?.callLog?.callId ?? "")
+//                        self.hangup(result: { r in
+//                        }, callerID: mCore.currentCall?.callLog?.callId ?? "")
                        // self.mProviderDelegate.stopCall()
                     }
                 }
