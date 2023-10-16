@@ -1,12 +1,12 @@
 PODS:
   - adit_lin_plugin (0.0.1):
     - Flutter
-    - linphone-sdk (= 5.2.102)
+    - linphone-sdk (= 5.2.109)
   - Flutter (1.0.0)
   - fluttertoast (0.0.2):
     - Flutter
     - Toast
-  - linphone-sdk (5.2.102)
+  - linphone-sdk (5.2.109)
   - permission_handler_apple (9.1.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -40,10 +40,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/ios"
 
 SPEC CHECKSUMS:
-  adit_lin_plugin: cc44df3672022674c4402315d58a47c3d70066c3
+  adit_lin_plugin: 3f47715f3b15018fa6577adac6ee55330742ec6c
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
-  linphone-sdk: 9f6270409956b5c455e1763590085e84ddf60306
+  linphone-sdk: 07475165f7ea68fa45085ca9c7060615aca1decb
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
