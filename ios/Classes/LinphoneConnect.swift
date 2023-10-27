@@ -54,7 +54,7 @@ class LinphoneConnect
         try? mCore = factory.createCore(configPath: "\(configDir)/MyConfig", factoryConfigPath: "", systemContext: nil)
         
        // mCore.callkitEnabled = true
-        mCore.pushNotificationEnabled = true
+       // mCore.pushNotificationEnabled = true
       //  mProviderDelegate = IncomingCallKitDelegate(context: self)
         
         mCore.genericComfortNoiseEnabled = true
@@ -277,8 +277,8 @@ class LinphoneConnect
             try accountParams.setServeraddress(newValue: address)
             //accountParams.expires = 60
             accountParams.registerEnabled = true
-           // accountParams.pushNotificationAllowed = true
-            accountParams.pushNotificationConfig?.provider = "apns.dev"
+            accountParams.pushNotificationAllowed = false
+           // accountParams.pushNotificationConfig?.provider = "apns.dev"
             mCore.setUserAgent(name: "LinPhone iOS", version: "0.0.1")
             mCore.configureAudioSession()
             mAccount = try mCore.createAccount(params: accountParams)
