@@ -277,7 +277,7 @@ class LinphoneConnect
             try accountParams.setServeraddress(newValue: address)
             //accountParams.expires = 60
             accountParams.registerEnabled = true
-            accountParams.pushNotificationAllowed = true
+           // accountParams.pushNotificationAllowed = true
             accountParams.pushNotificationConfig?.provider = "apns.dev"
             mCore.setUserAgent(name: "LinPhone iOS", version: "0.0.1")
             mCore.configureAudioSession()
