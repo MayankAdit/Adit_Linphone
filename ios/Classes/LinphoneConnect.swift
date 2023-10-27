@@ -54,7 +54,7 @@ class LinphoneConnect
         try? mCore = factory.createCore(configPath: "\(configDir)/MyConfig", factoryConfigPath: "", systemContext: nil)
         
        // mCore.callkitEnabled = true
-       // mCore.pushNotificationEnabled = true
+        mCore.pushNotificationEnabled = false
       //  mProviderDelegate = IncomingCallKitDelegate(context: self)
         
         mCore.genericComfortNoiseEnabled = true
