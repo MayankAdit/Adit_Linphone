@@ -275,7 +275,7 @@ class LinphoneConnect
             let address = try Factory.Instance.createAddress(addr: String("sip:" + domain))
             try address.setTransport(newValue: transport)
             try accountParams.setServeraddress(newValue: address)
-            accountParams.expires = 60
+            //accountParams.expires = 60
             accountParams.registerEnabled = true
             accountParams.pushNotificationAllowed = true
             accountParams.pushNotificationConfig?.provider = "apns.dev"
