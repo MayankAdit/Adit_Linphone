@@ -1,16 +1,14 @@
-import 'package:adit_lin_plugin/constant.dart';
 import 'package:adit_lin_plugin_example/action_button.dart';
-import 'package:adit_lin_plugin_example/call_data_model.dart';
-import 'package:adit_lin_plugin_example/call_manager.dart';
+import 'package:adit_lin_plugin_example/linphone_initial_setup/call_manager.dart';
+import 'package:adit_lin_plugin_example/linphone_initial_setup/model/sip_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'package:sip_ua/sip_ua.dart';
 
 class DialPadWidget extends StatefulWidget {
-  // final SIPUAHelper? _helper;
   const DialPadWidget({Key? key}) : super(key: key);
+
   @override
   MyDialPadWidget createState() => MyDialPadWidget();
 }
@@ -18,106 +16,105 @@ class DialPadWidget extends StatefulWidget {
 Map<String, dynamic>? callData;
 
 class MyDialPadWidget extends State<DialPadWidget> {
-//// handle outGoing
-  Future<dynamic> _handleMethod(MethodCall methodCall) async {
-    switch (methodCall.method) {
-      case AppTexts.isRegistrationState:
-        switch (methodCall.arguments) {
-          case AppTexts.progress:
-          debugPrint("register progress");
-            break;
-          case AppTexts.ok:
-            _preferences.setBool('isLoginChannel', true);
-            Fluttertoast.showToast(
-                msg: "Registration Done!",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.black,
-                textColor: Colors.white,
-                fontSize: 16.0);
-            break;
-          case AppTexts.cleared:
-            break;
-          case AppTexts.failed:
-            _preferences.setBool('isLoginChannel', false);
-            Fluttertoast.showToast(
-                msg: "Registration Faild!",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.black,
-                textColor: Colors.white,
-                fontSize: 16.0);
-            break;
-          default:
-        }
-        break;
-      default:
-    }
-  }
-
-//// handle incomingnn                      
-  Future<dynamic> handleMethodIncoming(MethodCall call) async {
-    if (call.arguments != null) {
-      CallManager().call = CallDataModel(
-          call.arguments["callId"],
-          call.arguments["callerName"],
-          call.arguments["duration"],
-          call.arguments["state"],
-          call.arguments["direction"]);
-    }
-    switch (call.method) {
-      case AppTexts.isAcceptCallChannel:
-        CallManager().isBackToBackground = true;
-        Navigator.pushNamed(context, '/callscreen').then((value) {
-          _loadSettings();
-        });
-        break;
-      default:
-    }
-  }
-
   String? _dest;
-  //SIPUAHelper? get helper => widget._helper;
+
   TextEditingController? _textController;
   late SharedPreferences _preferences;
-  String? receivedMsg;
 
   @override
   initState() {
     super.initState();
-    receivedMsg = "";
-    _bindEventListeners();
-    _loadSettings();
-    _textController?.text = "";
+
+    initData();
   }
 
-  void _loadSettings() async {
+  void initData() async {
     _preferences = await SharedPreferences.getInstance();
-    _dest = _preferences.getString('dest') ?? '8324765379';
+    _dest = _preferences.getString('dest') ?? '024';
     _textController = TextEditingController(text: _dest);
     _textController!.text = _dest!;
-    var isLogedIn = _preferences.getBool('isLoginChannel');
-    if (isLogedIn == false || isLogedIn == null) {
-      CallManager().connectCall(AppTexts.isLoginChannel, "8324765379");
-    } else {
-      CallManager().connectCall(AppTexts.isAlreadyLogin, "8324765379");
-    }
-
-    CallManager()
-        .aditLinPlugin
-        ?.methodChannel
-        .setMethodCallHandler((_handleMethod));
-    CallManager()
-        .demoCallBack
-        .callBackChannel
-        ?.setMethodCallHandler(handleMethodIncoming);
     setState(() {});
+
+    String userName = "021-021OwnerVMobile1668";
+    String password = "TFXzMSapF6hFUxZU";
+
+    var sipConfiguration = SipConfigurationBuilder(
+            extension: userName,
+            domain: "pjsipbeta1.adit.com:65080",
+            password: password)
+        .setKeepAlive(true)
+        .setPort(65080)
+        .setTransport("Udp")
+        .build();
+    LinePhoneCallManager.callModule.initSipModule(sipConfiguration, context);
+    // LinePhoneCallManager.callModule.eventStreamController.stream
+    //     .listen((event) {
+    //   switch (event['event']) {
+    //     case SipEvent.AccountRegistrationStateChanged:
+    //       {
+    //         var body = event['body'];
+    //
+    //         print(body);
+    //       }
+    //       break;
+    //     case SipEvent.Ring:
+    //       {
+    //         var body = event['body'];
+    //         print("object  dialer ${body["isIncoming"]}");
+    //         if (body["isIncoming"]) {
+    //           Navigator.pushNamed(context, '/callaccept').then((value) {});
+    //         }
+    //       }
+    //       break;
+    //     case SipEvent.Up:
+    //       {
+    //         var body = event['body'];
+    //         print("Up");
+    //       }
+    //       break;
+    //     case SipEvent.Hangup:
+    //       {
+    //         var body = event['body'];
+    //         print("Hangup");
+    //       }
+    //       break;
+    //     case SipEvent.Paused:
+    //       {
+    //         print("Paused");
+    //       }
+    //       break;
+    //     case SipEvent.Resuming:
+    //       {
+    //         print("Resuming");
+    //       }
+    //       break;
+    //     case SipEvent.Missed:
+    //       {
+    //         var body = event['body'];
+    //         print("Missed");
+    //         print(body);
+    //       }
+    //       break;
+    //     case SipEvent.Error:
+    //       {
+    //         var body = event['body'];
+    //         print("Error");
+    //         print(body);
+    //       }
+    //       break;
+    //   }
+    // });
   }
 
-  void _bindEventListeners() {
-    //helper!.addSipUaHelperListener(this);
+  permission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.microphone,
+      Permission.camera,
+    ].request();
+
+    if (statuses[Permission.microphone] != null) {}
+
+    if (await Permission.location.isRestricted) {}
   }
 
   void _handleBackSpace([bool deleteAll = false]) {
@@ -209,15 +206,14 @@ class MyDialPadWidget extends State<DialPadWidget> {
                     icon: Icons.call_sharp,
                     fillColor: Colors.green,
                     onPressed: () {
+                      permission();
                       _preferences.setString(
                           'dest', _textController?.text ?? "");
-                      CallManager().connectCall(AppTexts.isOutgoingChannel,
-                          _textController?.text ?? ""); //"12817191772"
-                      CallManager().call = CallDataModel(
-                          "", _textController?.text ?? "", 0, "", "");
-                      Navigator.pushNamed(context, '/callscreen').then((value) {
-                        _loadSettings();
-                      });
+
+                      LinePhoneCallManager.callModule
+                          .call(_textController?.text ?? "");
+                      Navigator.pushNamed(context, '/callscreen')
+                          .then((value) {});
                     },
                   ),
                   ActionButton(
@@ -249,27 +245,4 @@ class MyDialPadWidget extends State<DialPadWidget> {
                   ),
                 ])));
   }
-
-  // @override
-  // void registrationStateChanged(RegistrationState state) {
-  //   setState(() {});
-  // }
-
-  // @override
-  // void transportStateChanged(TransportState state) {}
-
-  // @override
-  // void callStateChanged(Call call, CallState callState) {}
-
-  // @override
-  // void onNewMessage(SIPMessageRequest msg) {
-  //   //Save the incoming message to DB
-  //   String? msgBody = msg.request.body as String?;
-  //   setState(() {
-  //     receivedMsg = msgBody;
-  //   });
-  // }
-
-  // @override
-  // void onNewNotify(Notify ntf) {}
 }

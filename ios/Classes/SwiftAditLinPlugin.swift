@@ -3,107 +3,125 @@ import UIKit
 import linphone
 import SwiftUI
 
-public class SwiftAditLinPlugin: NSObject, FlutterPlugin {
+public class SwiftAditLinPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     
-    var linphoneConnect: LinphoneConnect!
-    private var channel: FlutterMethodChannel? = nil
+    private var sipManager: SipManager = SipManager.instance
+    static var eventSink: FlutterEventSink?
     
     @objc public private(set) static var sharedInstance: SwiftAditLinPlugin!
     
-    static var eventSink: FlutterEventSink?
-    
-    init(with registrar: FlutterPluginRegistrar) {
-        super.init()
-        linphoneConnect = LinphoneConnect(registery: registrar)
-    }
-    
+
     public static func register(with registrar: FlutterPluginRegistrar) {
-//        if(sharedInstance == nil){
-//            sharedInstance = SwiftAditLinPlugin(with: registrar)
-//        } else {
-//            let channel = FlutterMethodChannel(name: aditLinPlugin, binaryMessenger: registrar.messenger())
-//            let instance = SwiftAditLinPlugin(with: registrar)
-//            instance.channel = channel
-//            registrar.addMethodCallDelegate(instance, channel: channel)
-//        }
-        let channel = FlutterMethodChannel(name: aditLinPlugin, binaryMessenger: registrar.messenger())
-        sharedInstance = SwiftAditLinPlugin(with: registrar)
-        sharedInstance.channel = channel
-        registrar.addMethodCallDelegate(sharedInstance, channel: channel)
-        let eventChannelCallBack = FlutterEventChannel(name: aditcallbackEvent, binaryMessenger: registrar.messenger())
-        eventChannelCallBack.setStreamHandler(sharedInstance)
+
+         
+          let instance = SwiftAditLinPlugin()
+          let methodChannel = FlutterMethodChannel(name: "method_channel_adit_lin", binaryMessenger: registrar.messenger())
+          registrar.addMethodCallDelegate(instance, channel: methodChannel)
+          let eventChannel = FlutterEventChannel(name: "event_channel_adit_lin", binaryMessenger: registrar.messenger())
+          eventChannel.setStreamHandler(instance)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        guard let args = call.arguments as? [String : Any] else {return}
-        let userName = args[username] as? String
-        let password = args[passwd] as? String
-        let domain = args[domain] as? String
-        let transportType = args[transportType] as? String
-        let methodType = args[methodType] as? String
-        let phone = args[phone] as? String
-        let sipExtention = args[sipExtention] as? String
-        let callerId = args[callerID] as? String
-        print("get caller id --------", callerId)
-        linphoneConnect.username = userName ?? ""
-        linphoneConnect.passwd = password ?? ""
-        linphoneConnect.domain = domain ?? ""
-        linphoneConnect.transportType = transportType ?? ""
-        linphoneConnect.channel = SwiftAditLinPlugin.sharedInstance.channel
-        linphoneConnect.methodType = methodType ?? ""
-        linphoneConnect.phone = phone ?? ""
-        linphoneConnect.sipExtention = sipExtention ?? ""
-        
-        if(methodType == isLoginChannel){
-            linphoneConnect.login()
+            switch(call.method) {
+            case "initSipModule":
+               
+                let jsonString = toJson(from: (call.arguments as? [String:Any])?["sipConfiguration"])
+                if(jsonString == nil) {
+                    return NSLog("Sip configuration is not valid")
+                }
+                let sipConfiguration = SipConfiguaration.toObject(JSONString: jsonString!)
+                if(sipConfiguration == nil) {
+                    return NSLog("Sip configuration is not valid")
+                }
+                sipManager.initSipModule(sipConfiguration: sipConfiguration!)
+                break
+            case "call":
+                let phoneNumber = (call.arguments as? [String:Any])?["recipient"] as? String
+                if(phoneNumber == nil) {
+                    // NSLog("Recipient is not valid")
+                    return result(FlutterError(code: "404", message: "Recipient is not valid", details: nil))
+                }
+                sipManager.call(recipient: phoneNumber!, result: result)
+                break
+            case "hangup":
+                sipManager.hangup(result: result)
+                break
+            case "answer":
+                sipManager.answer(result: result)
+                break
+            case "reject":
+                sipManager.reject(result: result)
+                break
+            case "transfer":
+                let ext = (call.arguments as? [String:Any])?["extension"] as? String
+                if(ext == nil) {
+                    // NSLog("Extension is not valid")
+                    return result(FlutterError(code: "404", message: "Extension is not valid", details: nil))
+                }
+                sipManager.transfer(recipient: ext!, result: result)
+                break
+            case "pause":
+                sipManager.pause(result: result)
+                break
+            case "resume":
+                sipManager.resume(result: result)
+                break
+            case "sendDTMF":
+                let dtmf = (call.arguments as? [String:Any])?["recipient"] as? String
+                if(dtmf == nil) {
+                    return result(FlutterError(code: "404", message: "DTMF is not valid", details: nil))
+                }
+                sipManager.sendDTMF(dtmf: dtmf!, result: result)
+                break
+            case "toggleSpeaker":
+                sipManager.toggleSpeaker(result: result)
+                break
+            case "toggleMic":
+                sipManager.toggleMic(result: result)
+                break
+            case "refreshSipAccount":
+                sipManager.refreshSipAccount(result: result)
+                break
+            case "unregisterSipAccount":
+                sipManager.unregisterSipAccount(result: result)
+                break
+            case "getCallId":
+                sipManager.getCallId(result: result)
+                break
+            case "getMissedCalls":
+                sipManager.getMissCalls(result: result)
+                break
+            case "getSipRegistrationState":
+                sipManager.getSipReistrationState(result: result)
+                break
+            case "isMicEnabled":
+                sipManager.isMicEnabled(result: result)
+                break
+            case "isSpeakerEnabled":
+                sipManager.isSpeakerEnabled(result: result)
+                break
+                // case "removeListener":
+                // sipManager.removeListener()
+                // break
+            case "getPlatformVersion":
+                result("iOS " + UIDevice.current.systemVersion)
+                break
+            default:
+                result(FlutterMethodNotImplemented)
+            }
         }
-        linphoneConnect.remoteAddress = "sip:\(linphoneConnect.phone)\(linphoneConnect.sipExtention)"//@pjsip5.adit.com" //@pjsipbeta1.adit.com"
-        
-        if methodType == isOutgoingChannel {
-            linphoneConnect.outgoingCall(result: result)
-        } else if methodType == isHungUpChannel {
-           // linphoneConnect.mProviderDelegate.stopCall()
-            linphoneConnect.hangup(result: result, callerID: callerId ?? "")
-        } else if methodType == isMuteCallChannel {
-            linphoneConnect.toggleMic(result: result)
-        } else if methodType == isHoldAndUnhold {
-            linphoneConnect.pauseOrResume()
-        } else if methodType == isSpeakerChannel {
-            linphoneConnect.toggleSpeaker(result: result)
-        } else if methodType == isUnregistration {
-            linphoneConnect.unregister(result: result)
-        } else if methodType == isDelete {
-            linphoneConnect.delete()
-        } else if methodType == isAcceptCallChannel {
-            linphoneConnect.acceptCall(result: result, callerID: callerId ?? "")
-        } else if methodType == isPausedChannel {
-            linphoneConnect.pause(result: result)
-        } else if methodType == isResumChannel {
-            linphoneConnect.resume(result: result)
-        } else if methodType == isRejectCall {
-            linphoneConnect.reject(result: result)
-        } else if methodType == isTransfer {
-            linphoneConnect.transfer(recipient: linphoneConnect.phone, result: result)
-        }
-        result("iOS " + UIDevice.current.systemVersion)
-    }
+
+
+        public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+                SwiftAditLinPlugin.eventSink = events
+                return nil
+            }
+
+            public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+                SwiftAditLinPlugin.eventSink = nil
+                return nil
+            }
     
-    @objc public func showCallkitIncoming(_ data: String, callName: String, fromPushKit: Bool, completion: @escaping () -> Void) {
-        linphoneConnect.incomingCallName = callName
-//        linphoneConnect.mProviderDelegate.incomingCall(callID: data) {
-//            completion()
-//        }
-    }
+
 }
 
-extension SwiftAditLinPlugin: FlutterStreamHandler {
-    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        SwiftAditLinPlugin.eventSink = events
-        return nil
-    }
-    
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        SwiftAditLinPlugin.eventSink = nil
-        return nil
-    }
-}

@@ -1,8 +1,8 @@
 //
 //  SipEvent.swift
-//  adit_lin_plugin
+//  voip24h_sdk_mobile
 //
-//  Created by Adit Mac1 on 02/10/23.
+//  Created by Phát Nguyễn on 15/08/2022.
 //
 
 import Foundation

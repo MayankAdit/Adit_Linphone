@@ -1,10 +1,4 @@
-//
 //  RegistrationSipState.swift
-//  adit_lin_plugin
-//
-//  Created by Adit Mac1 on 02/10/23.
-//
-
 import Foundation
 
 enum RegisterSipState : String, CaseIterable {

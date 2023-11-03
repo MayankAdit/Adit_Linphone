@@ -1,34 +1,24 @@
-// ignore_for_file: sort_child_properties_last
-// ignore: depend_on_referenced_packages
-
 import 'dart:async';
-import 'package:adit_lin_plugin/constant.dart';
+
 import 'package:adit_lin_plugin_example/action_button.dart';
-import 'package:adit_lin_plugin_example/call_data_model.dart';
-import 'package:adit_lin_plugin_example/call_manager.dart';
+import 'package:adit_lin_plugin_example/linphone_initial_setup/call_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-//import 'package:sip_ua/sip_ua.dart';
 
-// ignore: must_be_immutable
 class CallScreenWidget extends StatefulWidget {
- // final SIPUAHelper? _helper;
   const CallScreenWidget({Key? key}) : super(key: key);
+
   @override
   MyCallScreenWidget createState() => MyCallScreenWidget();
 }
 
-class MyCallScreenWidget extends State<CallScreenWidget>
-     {
+class MyCallScreenWidget extends State<CallScreenWidget> {
   bool _showNumPad = false;
   String _timeLabel = 'Ringing...';
   late Timer _timer;
   bool _audioMuted = false;
   bool _speakerOn = false;
   bool _hold = false;
- // SIPUAHelper? get helper => widget._helper;
-
-  CallDataModel? get call => CallManager().call;
 
   bool callConnected = false;
 
@@ -37,30 +27,13 @@ class MyCallScreenWidget extends State<CallScreenWidget>
   @override
   initState() {
     super.initState();
-    //helper!.addSipUaHelperListener(this);
-    CallManager()
-        .aditLinPlugin
-        ?.methodChannel
-        .setMethodCallHandler((_handleMethod));
-
-    CallManager()
-        .demoCallBack
-        .callBackChannel
-        ?.setMethodCallHandler(handleMethodIncoming);
 
     textController?.text = "";
-    if (CallManager().isBackToBackground) {
-      _startTimer();
-      callConnected = true;
-      CallManager().isBackToBackground = false;
-    }
-    
   }
 
   @override
   deactivate() {
     super.deactivate();
-    //helper!.removeSipUaHelperListener(this);
   }
 
   void _startTimer() {
@@ -78,46 +51,30 @@ class MyCallScreenWidget extends State<CallScreenWidget>
     });
   }
 
-  // @override
-  // void callStateChanged(Call call, CallState callState) {}
-
-  // @override
-  // void transportStateChanged(TransportState state) {}
-
-  // @override
-  // void registrationStateChanged(RegistrationState state) {}
-
   void _handleHangup() {
-    if (_timeLabel != 'Ringing...') {
-      _timer.cancel();
-    }
-    CallManager().connectCall(AppTexts.isHungUpChannel, "8324765379");
-    CallManager().demoCallBack;
+    LinePhoneCallManager.callModule.hangup();
+
     Navigator.pop(context);
   }
 
-   void moveDialor() {
+  void moveDialor() {
     if (_timeLabel != 'Ringing...') {
       _timer.cancel();
     }
-    CallManager().connectCall(AppTexts.isAlreadyLogin, "8324765379");
-    CallManager().demoCallBack;
+
     Navigator.pop(context);
   }
 
   void _muteAudio() {
-    if (_audioMuted) {
-      CallManager().connectCall(AppTexts.isUnMuteCallChannel, "8324765379");
-    } else {
-      CallManager().connectCall(AppTexts.isMuteCallChannel, "8324765379");       
-    }
+    LinePhoneCallManager.callModule.toggleMic();
   }
 
   void _handleHold() {
-    CallManager().connectCall(AppTexts.isHoldAndUnhold, "8324765379");
+    LinePhoneCallManager.callModule.pause();
   }
 
   late String transferTarget;
+
   void _handleTransfer() {
     showDialog<void>(
       context: context,
@@ -183,7 +140,7 @@ class MyCallScreenWidget extends State<CallScreenWidget>
   }
 
   void _toggleSpeaker() {
-    CallManager().connectCall(AppTexts.isSpeakerChannel, "8324765379");
+    LinePhoneCallManager.callModule.toggleSpeaker();
   }
 
   List<Widget> _buildNumPad() {
@@ -377,13 +334,12 @@ class MyCallScreenWidget extends State<CallScreenWidget>
                         )))
                 : Container(),
             !_showNumPad
-                ? Center(
+                ? const Center(
                     child: Padding(
-                        padding: const EdgeInsets.all(6),
+                        padding: EdgeInsets.all(6),
                         child: Text(
-                          call?.callerName ?? "",
-                          style: const TextStyle(
-                              fontSize: 18, color: Colors.black54),
+                          "",
+                          style: TextStyle(fontSize: 18, color: Colors.black54),
                         )))
                 : Container(),
             !_showNumPad
@@ -416,137 +372,5 @@ class MyCallScreenWidget extends State<CallScreenWidget>
         floatingActionButton: Padding(
             padding: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 24.0),
             child: SizedBox(width: 320, child: _buildActionButtons())));
-  }
-
-  // @override
-  // void onNewMessage(SIPMessageRequest msg) {}
-
-  // @override
-  // void onNewNotify(Notify ntf) {}
-
-  /// MARK: --- Outgoing ------
-
-  Future<dynamic> _handleMethod(MethodCall methodCall) async {
-    if (methodCall.arguments != null) {
-      CallManager().call = CallDataModel(
-          methodCall.arguments["callId"],
-          methodCall.arguments["callerName"],
-          methodCall.arguments["duration"],
-          methodCall.arguments["state"],
-          methodCall.arguments["direction"]);
-    }
-    switch (methodCall.method) {
-      case AppTexts.isCallEventChannel:
-        switch (call?.state) {
-          case AppTexts.outgoingRinging:
-            break;
-          case AppTexts.connected:
-            _startTimer();
-            callConnected = true;
-            break;
-          case AppTexts.streamsRunning:
-            break;
-          case AppTexts.error:
-            moveDialor();
-            break;
-          case AppTexts.end:
-            moveDialor();
-            break;
-          default: 
-        }
-        break;
-      case AppTexts.isPausedChannel:
-        _hold = true;
-        setState(() {});
-        break;
-      case AppTexts.isResumChannel:
-        _hold = false;
-        setState(() {});
-        break;
-      case AppTexts.isMuteCallChannel:
-        _audioMuted = true;
-        setState(() {});
-        break;
-      case AppTexts.isUnMuteCallChannel:
-        _audioMuted = false;
-        setState(() {});
-        break;
-      case AppTexts.isOnSpeakerChannel:
-        _speakerOn = true;
-        setState(() {});
-        break;
-      case AppTexts.isOffSpeakerChannel:
-        _speakerOn = false;
-        setState(() {});
-        break;
-      case AppTexts.isRingingCallTerminate:
-        _speakerOn = false;
-        setState(() {});
-        break;
-      case AppTexts.isStartCallChannel:
-        debugPrint("linphone call channel 11");
-        break;
-      default:
-    }
-  }
-
-  /// MARK: --- Incoming ------
-
-  Future<dynamic> handleMethodIncoming(MethodCall methodCall) async {
-    if (methodCall.arguments != null) {
-      CallManager().call = CallDataModel(
-          methodCall.arguments["callId"],
-          methodCall.arguments["callerName"],
-          methodCall.arguments["duration"],
-          methodCall.arguments["state"],
-          methodCall.arguments["direction"]);
-    }
-    switch (methodCall.method) {
-      case AppTexts.isCallEventChannel:
-      switch (call?.state) {
-          case AppTexts.connected:
-            break;
-          case AppTexts.streamsRunning:
-            break;
-          case AppTexts.error:
-            moveDialor();
-            break;
-          case AppTexts.end:
-            moveDialor();
-            break;
-          default:   
-        }
-        break;
-      case AppTexts.isPausedChannel:
-        _hold = true;
-        setState(() {});
-        break;
-      case AppTexts.isResumChannel:
-        _hold = false;
-        setState(() {});
-        break;
-      case AppTexts.isMuteCallChannel:
-        _audioMuted = true;
-        setState(() {});
-        break;
-      case AppTexts.isUnMuteCallChannel:
-        _audioMuted = false;
-        setState(() {});
-        break;
-      case AppTexts.isOnSpeakerChannel:
-        _speakerOn = true;
-        setState(() {});
-        break;
-      case AppTexts.isOffSpeakerChannel:
-        _speakerOn = false;
-        setState(() {});
-        break;
-      case AppTexts.isRingingCallTerminate:
-        break;
-      case AppTexts.isStartCallChannel:
-        debugPrint("Incoming call 11");
-        break;
-      default:
-    }
   }
 }

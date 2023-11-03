@@ -1,31 +1,20 @@
-
+import 'package:adit_lin_plugin_example/call_accept_reject.dart';
 import 'package:adit_lin_plugin_example/call_screen.dart';
 import 'package:adit_lin_plugin_example/dialor_screen.dart';
-import 'package:flutter/foundation.dart'
-    show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
-// ignore: depend_on_referenced_packages
-// import 'package:flutter_webrtc/flutter_webrtc.dart';
-// import 'package:sip_ua/sip_ua.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  // if (WebRTC.platformIsDesktop) {
-  //   debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  // }
   runApp(MyApp());
 }
 
-typedef PageContentBuilder = Widget Function(
-    [ Object? arguments]);
+typedef PageContentBuilder = Widget Function([Object? arguments]);
 
-// ignore: must_be_immutable
 class MyApp extends StatelessWidget {
-  //final SIPUAHelper _helper = SIPUAHelper();
   Map<String, PageContentBuilder> routes = {
-    '/': ([Object? arguments]) => DialPadWidget(),
-    '/callscreen': ([Object? arguments]) =>
-        CallScreenWidget(),
+    '/': ([Object? arguments]) => const DialPadWidget(),
+    '/callscreen': ([Object? arguments]) => const CallScreenWidget(),
+    '/callaccept': ([Object? arguments]) => const CallAcceptReject(),
   };
 
   MyApp({super.key});
@@ -36,8 +25,7 @@ class MyApp extends StatelessWidget {
     if (pageContentBuilder != null) {
       if (settings.arguments != null) {
         final Route route = MaterialPageRoute<Widget>(
-            builder: (context) =>
-                pageContentBuilder(settings.arguments));
+            builder: (context) => pageContentBuilder(settings.arguments));
         return route;
       } else {
         final Route route = MaterialPageRoute<Widget>(
