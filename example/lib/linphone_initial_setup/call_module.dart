@@ -5,6 +5,11 @@ import 'package:adit_lin_plugin_example/linphone_initial_setup/model/sip_configu
 import 'package:adit_lin_plugin_example/linphone_initial_setup/utils/sip_event.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_callkit_incoming/entities/android_params.dart';
+import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
+import 'package:flutter_callkit_incoming/entities/ios_params.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
+import 'package:uuid/uuid.dart';
 
 class CallModule {
   CallModule._privateConstructor();
@@ -67,7 +72,8 @@ class CallModule {
 
           if (isInComing) {
             if (context != null) {
-              Navigator.pushNamed(context!, '/callaccept').then((value) {});
+              // Navigator.pushNamed(context!, '/callaccept').then((value) {});
+              makeFakeCallInComing("6377897824");
             }
           }
         }
@@ -169,5 +175,46 @@ class CallModule {
 
   Future<bool> isSpeakerEnabled() async {
     return await _methodChannel.invokeMethod('isSpeakerEnabled');
+  }
+
+  Future<void> makeFakeCallInComing(String number) async {
+    final params = CallKitParams(
+      id: const Uuid().v4(),
+      nameCaller: 'Hien Nguyen',
+      appName: 'Callkit',
+      avatar: '',
+      handle: '0123456789',
+      type: 0,
+      duration: 30000,
+      textAccept: 'Accept',
+      textDecline: 'Decline',
+      extra: <String, dynamic>{'userId': '1a2b3c4d'},
+      headers: <String, dynamic>{'apiKey': 'Abc@123!', 'platform': 'flutter'},
+      android: const AndroidParams(
+        isCustomNotification: false,
+        isShowLogo: false,
+        ringtonePath: 'system_ringtone_default',
+        backgroundColor: '#FF092A3D',
+        backgroundUrl: '',
+        actionColor: '#4CAF50',
+      ),
+      ios: const IOSParams(
+        iconName: 'AppIcon',
+        handleType: '',
+        supportsVideo: false,
+        maximumCallGroups: 1,
+        maximumCallsPerCallGroup: 1,
+        audioSessionMode: 'default',
+        audioSessionActive: true,
+        audioSessionPreferredSampleRate: 44100.0,
+        audioSessionPreferredIOBufferDuration: 0.005,
+        supportsDTMF: false,
+        supportsHolding: false,
+        supportsGrouping: false,
+        supportsUngrouping: false,
+        ringtonePath: 'system_ringtone_default',
+      ),
+    );
+    await FlutterCallkitIncoming.showCallkitIncoming(params);
   }
 }

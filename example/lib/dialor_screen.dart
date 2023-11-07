@@ -3,8 +3,14 @@ import 'package:adit_lin_plugin_example/linphone_initial_setup/call_manager.dart
 import 'package:adit_lin_plugin_example/linphone_initial_setup/model/sip_configuration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_callkit_incoming/entities/android_params.dart';
+import 'package:flutter_callkit_incoming/entities/call_event.dart';
+import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
+import 'package:flutter_callkit_incoming/entities/ios_params.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class DialPadWidget extends StatefulWidget {
   const DialPadWidget({Key? key}) : super(key: key);
@@ -35,75 +41,20 @@ class MyDialPadWidget extends State<DialPadWidget> {
     _textController!.text = _dest!;
     setState(() {});
 
-    String userName = "021-021OwnerVMobile1668";
-    String password = "TFXzMSapF6hFUxZU";
+    String userName = "021-021OwnerVMobile1668"; //"001-001OwnervLive1285" live
+    String password = "TFXzMSapF6hFUxZU"; //"HEScrrM2U75WnL8m"; live
+    String domain = "pjsipbeta1.adit.com:65080";
+
+    ///"pjsip1.adit.com:65080" live
 
     var sipConfiguration = SipConfigurationBuilder(
-            extension: userName,
-            domain: "pjsipbeta1.adit.com:65080",
-            password: password)
+            extension: userName, domain: domain, password: password)
         .setKeepAlive(true)
         .setPort(65080)
         .setTransport("Udp")
         .build();
     LinePhoneCallManager.callModule.initSipModule(sipConfiguration, context);
-    // LinePhoneCallManager.callModule.eventStreamController.stream
-    //     .listen((event) {
-    //   switch (event['event']) {
-    //     case SipEvent.AccountRegistrationStateChanged:
-    //       {
-    //         var body = event['body'];
-    //
-    //         print(body);
-    //       }
-    //       break;
-    //     case SipEvent.Ring:
-    //       {
-    //         var body = event['body'];
-    //         print("object  dialer ${body["isIncoming"]}");
-    //         if (body["isIncoming"]) {
-    //           Navigator.pushNamed(context, '/callaccept').then((value) {});
-    //         }
-    //       }
-    //       break;
-    //     case SipEvent.Up:
-    //       {
-    //         var body = event['body'];
-    //         print("Up");
-    //       }
-    //       break;
-    //     case SipEvent.Hangup:
-    //       {
-    //         var body = event['body'];
-    //         print("Hangup");
-    //       }
-    //       break;
-    //     case SipEvent.Paused:
-    //       {
-    //         print("Paused");
-    //       }
-    //       break;
-    //     case SipEvent.Resuming:
-    //       {
-    //         print("Resuming");
-    //       }
-    //       break;
-    //     case SipEvent.Missed:
-    //       {
-    //         var body = event['body'];
-    //         print("Missed");
-    //         print(body);
-    //       }
-    //       break;
-    //     case SipEvent.Error:
-    //       {
-    //         var body = event['body'];
-    //         print("Error");
-    //         print(body);
-    //       }
-    //       break;
-    //   }
-    // });
+    getCallingEvent();
   }
 
   permission() async {
@@ -244,5 +195,104 @@ class MyDialPadWidget extends State<DialPadWidget> {
                     children: _buildDialPad(),
                   ),
                 ])));
+  }
+
+  Future<void> makeFakeCallInComing(String number) async {
+    final params = CallKitParams(
+      id: const Uuid().v4(),
+      nameCaller: 'Hien Nguyen',
+      appName: 'Callkit',
+      avatar: '',
+      handle: '0123456789',
+      type: 0,
+      duration: 30000,
+      textAccept: 'Accept',
+      textDecline: 'Decline',
+      extra: <String, dynamic>{'userId': '1a2b3c4d'},
+      headers: <String, dynamic>{'apiKey': 'Abc@123!', 'platform': 'flutter'},
+      android: const AndroidParams(
+        isCustomNotification: false,
+        isShowLogo: false,
+        ringtonePath: 'system_ringtone_default',
+        backgroundColor: '#FF092A3D',
+        backgroundUrl: '',
+        actionColor: '#4CAF50',
+      ),
+      ios: const IOSParams(
+        iconName: 'AppIcon',
+        handleType: '',
+        supportsVideo: false,
+        maximumCallGroups: 1,
+        maximumCallsPerCallGroup: 1,
+        audioSessionMode: 'default',
+        audioSessionActive: true,
+        audioSessionPreferredSampleRate: 44100.0,
+        audioSessionPreferredIOBufferDuration: 0.005,
+        supportsDTMF: false,
+        supportsHolding: false,
+        supportsGrouping: false,
+        supportsUngrouping: false,
+        ringtonePath: 'system_ringtone_default',
+      ),
+    );
+    await FlutterCallkitIncoming.showCallkitIncoming(params);
+  }
+
+  getCallingEvent() {
+    FlutterCallkitIncoming.onEvent.listen((event) async {
+      print("FlutterCallkitIncoming Event ${event!.event}");
+      print("FlutterCallkitIncoming Body ${event.body}");
+
+      switch (event.event) {
+        case Event.actionCallIncoming:
+          break;
+        case Event.actionCallStart:
+          // TODO: started an outgoing call
+          // TODO: show screen calling in Flutter
+          break;
+        case Event.actionCallAccept:
+          LinePhoneCallManager.callModule.answer();
+          break;
+        case Event.actionCallDecline:
+          LinePhoneCallManager.callModule.reject();
+
+          break;
+        case Event.actionCallEnded:
+          // TODO: ended an incoming/outgoing call
+
+          break;
+        case Event.actionCallTimeout:
+          // TODO: missed an incoming call
+          break;
+        case Event.actionCallCallback:
+          // TODO: only Android - click action `Call back` from missed call notification
+          break;
+        case Event.actionCallToggleHold:
+          // TODO: only iOS
+          //
+
+          break;
+        case Event.actionCallToggleMute:
+          // TODO: only iOS
+
+          break;
+        case Event.actionCallToggleDmtf:
+          // TODO: only iOS
+          break;
+        case Event.actionCallToggleGroup:
+          // TODO: only iOS
+          break;
+        // case Event.ACTION_CALL_TOGGLE_AUDIO_SESSION:
+        //   // TODO: only iOS
+        //   break;
+        // case Event.ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP:
+        //   // TODO: only iOS
+        //   break;
+        case Event.actionCallCustom:
+          // TODO: Handle this case.
+
+          break;
+      }
+    });
   }
 }

@@ -2,6 +2,7 @@
 
 import Foundation
 import linphonesw
+import AVFAudio
 
 class SipManager {
     
@@ -13,15 +14,14 @@ class SipManager {
     
     private init() {
         do {
-          //  try mCore = Factory.Instance.createCore(configPath: "", factoryConfigPath: "", systemContext: nil)
             
-            let factory = Factory.Instance
-            let configDir = factory.getConfigDir(context: nil)
-            try? mCore = factory.createCore(configPath: "\(configDir)/MyConfig", factoryConfigPath: "", systemContext: nil)
-               
-          
+            LoggingService.Instance.logLevel = LogLevel.Debug
             
-            coreDelegate = CoreDelegateStub(
+            try? mCore = Factory.Instance.createCore(configPath: "", factoryConfigPath: "", systemContext: nil)
+            try? mCore.start()
+            
+            
+           coreDelegate = CoreDelegateStub(
                 onCallStateChanged: {(
                     core: Core,
                     call: Call,
@@ -117,15 +117,14 @@ class SipManager {
                         // NSLog("Nothing")
                         break
                     }
+                }, onAudioDeviceChanged: { (core: Core, device: AudioDevice) in
+                    // This callback will be triggered when a successful audio device has been changed
+                  print("--onAudioDeviceChanged--")
+                }, onAudioDevicesListUpdated: { (core: Core) in
+                    // This callback will be triggered when the available devices list has changed,
+                    // for example after a bluetooth headset has been connected/disconnected.
+                    print("---onAudioDevicesListUpdated--")
                 },
-                //                onAudioDevicesListUpdated: { (core: Core) in
-                //                    let currentAudioDeviceType = core.currentCall?.outputAudioDevice?.type
-                //                    if(currentAudioDeviceType != AudioDeviceType.Speaker && currentAudioDeviceType != AudioDeviceType.Earpiece) {
-                //                        return
-                //                    }
-                //                    let audioOutputType = AudioOutputType.allCases[currentAudioDeviceType!.rawValue].rawValue
-                //                    self.sendEvent(withName: "AudioDevicesChanged", body: ["audioOutputType": audioOutputType])
-                //                },
                 onAccountRegistrationStateChanged: { (core: Core, account: Account, state: RegistrationState, message: String) in
                     self.sendEvent(eventName: EventAccountRegistrationStateChanged, body: ["registrationState": RegisterSipState.allCases[state.rawValue].rawValue, "message": message])
                 }
@@ -156,35 +155,9 @@ class SipManager {
     public func initSipModule(sipConfiguration: SipConfiguaration) {
         do {
             
-            
-             
-            
             mCore.keepAliveEnabled = sipConfiguration.isKeepAlive
-            
             mCore.removeDelegate(delegate: coreDelegate)
             mCore.addDelegate(delegate: coreDelegate)
-            
-            mCore.genericComfortNoiseEnabled = true
-            mCore.echoCancellationEnabled = true
-            mCore.micEnabled = true
-            
-            mCore.adaptiveRateControlEnabled = true
-            mCore.ipv6Enabled = true
-            
-            let natPolicy = try? mCore.createNatPolicy()
-            natPolicy?.stunServer = "stun.linphone.org"
-            natPolicy?.iceEnabled = true
-            natPolicy?.stunEnabled = true
-            natPolicy?.turnEnabled = false
-            natPolicy?.upnpEnabled = true
-            natPolicy?.resolveStunServer()
-            natPolicy?.udpTurnTransportEnabled = true
-            mCore.natPolicy = natPolicy
-            mCore.ipv6Enabled = true
-            
-            mCore.setAudioPortRange(minPort: 7200, maxPort: 7299)
-                  
-           
             initSipAccount(ext: sipConfiguration.ext,password: sipConfiguration.password,domain: sipConfiguration.domain,port: sipConfiguration.port, transportType: TransportType.Udp)
             
         } catch {
@@ -218,7 +191,7 @@ class SipManager {
             
             // We use the Address object to easily set the transport protocol
             try address.setTransport(newValue: TransportType.Udp)
-            try address.setPort(newValue: 65080)
+           // try address.setPort(newValue: 65080)
             try accountParams.setServeraddress(newValue: address)
             // And we ensure the account will start the registration process
             accountParams.registerEnabled = true
@@ -226,7 +199,7 @@ class SipManager {
             // Now that our AccountParams is configured, we can create the Account object
             let account = try mCore.createAccount(params: accountParams)
             
-            mCore.configureAudioSession()
+            //mCore.configureAudioSession()
             
            
             
@@ -234,8 +207,8 @@ class SipManager {
             // Now let's add our objects to the Core
             mCore.addAuthInfo(info: authInfo)
             try mCore.addAccount(account: account)
-            mCore.iterate()
-            try? mCore.start()
+           // mCore.iterate()
+           // try? mCore.start()
             
             // Also set the newly added account as default
             mCore.defaultAccount = account
@@ -572,4 +545,28 @@ class SipManager {
     private func isMissed(callLog: CallLog?) -> Bool {
         return (callLog?.dir == Call.Dir.Incoming && callLog?.status == Call.Status.Missed)
     }
+    
+    private func setAVAudioSession() -> Void {
+        let audioSession = AVAudioSession.sharedInstance()
+                if (audioSession.responds(to: #selector(AVAudioSession.requestRecordPermission(_:)))) {
+                    AVAudioSession.sharedInstance().requestRecordPermission({(granted: Bool)-> Void in
+                        if granted {
+                            print("AVAudioSession permission - granted ")
+                            do {
+                                try audioSession.setCategory(AVAudioSession.Category.playAndRecord, mode: AVAudioSession.Mode.voiceChat, options: .defaultToSpeaker)
+                                try audioSession.setActive(true)
+                                
+                            }
+                            catch {
+                                print("AVAudioSession permission - Couldn't set Audio session category")
+                            }
+                        } else{
+                            print("AVAudioSession permission - not granted")
+                        }
+                    })
+                }
+    }
+    
+    
+  
 }

@@ -32,17 +32,25 @@ dependencies:
   shared_preferences: ^2.0.5
   permission_handler: ^9.2.0
   fluttertoast: ^8.2.2
+  uuid: ^4.0.0
+
+
+
 
 dependency_overrides:
   # sip_ua:
   #   git:
   #     url: https://github.com/krunaladit/dart-sip-ua.git
   #     ref: develop
-#   #  firebase_core_platform_interface: 4.5.1
-#   flutter_voip_push_notification:
-#     git:
-#       url: https://github.com/peerwaya/flutter_voip_push_notification.git
-#       ref: master
+  #   #  firebase_core_platform_interface: 4.5.1
+  #   flutter_voip_push_notification:
+  #     git:
+  #       url: https://github.com/peerwaya/flutter_voip_push_notification.git
+  #       ref: master
+  flutter_callkit_incoming:
+    git:
+      url: https://github.com/krunaladit/flutter_callkit_incoming.git
+      ref: develop-2-0
 
 dev_dependencies:
   flutter_test:
