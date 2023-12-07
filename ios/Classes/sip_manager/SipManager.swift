@@ -201,7 +201,19 @@ class SipManager {
             
             //mCore.configureAudioSession()
             
-           
+            mCore.echoCancellationEnabled = true
+            mCore.micEnabled = true
+            mCore.adaptiveRateControlEnabled = true
+            mCore.ipv6Enabled = true
+            let natPolicy = try? mCore.createNatPolicy()
+            natPolicy?.stunServer = "stun.linphone.org" //:65080
+            natPolicy?.iceEnabled = true
+            natPolicy?.stunEnabled = true
+            natPolicy?.turnEnabled = false
+            natPolicy?.upnpEnabled = true
+            natPolicy?.resolveStunServer()
+            natPolicy?.udpTurnTransportEnabled = true
+            mCore.natPolicy = natPolicy
             
             
             // Now let's add our objects to the Core

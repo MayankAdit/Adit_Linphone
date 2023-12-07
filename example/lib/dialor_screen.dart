@@ -36,14 +36,19 @@ class MyDialPadWidget extends State<DialPadWidget> {
 
   void initData() async {
     _preferences = await SharedPreferences.getInstance();
-    _dest = _preferences.getString('dest') ?? '024';
+    _dest = _preferences.getString('dest') ?? '8322399994';
     _textController = TextEditingController(text: _dest);
     _textController!.text = _dest!;
     setState(() {});
 
-    String userName = "021-021OwnerVMobile1668"; //"001-001OwnervLive1285" live
-    String password = "TFXzMSapF6hFUxZU"; //"HEScrrM2U75WnL8m"; live
-    String domain = "pjsipbeta1.adit.com:65080";
+    String userName =
+        "021-021OwnerVMobile2713"; //"601-V2Live2613" live ///021-021OwnerVMobile2713 :Beta
+    String password =
+        "PMmHUJajDZ7YT9Wy"; //"6ZybYWXZGLqunqHB"; live  // PMmHUJajDZ7YT9Wy Beta
+    String domain =
+        "pjsipbeta2.adit.com:65080"; //pjsip1.adit.com:65080 live  /// pjsipbeta2.adit.com:65080" beta
+
+    ///pjsipbeta2.adit.com:65080
 
     ///"pjsip1.adit.com:65080" live
 

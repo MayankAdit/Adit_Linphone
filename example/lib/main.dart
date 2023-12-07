@@ -1,10 +1,12 @@
 import 'package:adit_lin_plugin_example/call_accept_reject.dart';
+import 'package:adit_lin_plugin_example/call_manager.dart';
 import 'package:adit_lin_plugin_example/call_screen.dart';
 import 'package:adit_lin_plugin_example/dialor_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  CallManager();
   runApp(MyApp());
 }
 
