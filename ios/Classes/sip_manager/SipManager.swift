@@ -195,7 +195,7 @@ class SipManager {
             try accountParams.setServeraddress(newValue: address)
             // And we ensure the account will start the registration process
             accountParams.registerEnabled = true
-            
+            accountParams.expires = 60
             // Now that our AccountParams is configured, we can create the Account object
             let account = try mCore.createAccount(params: accountParams)
             
@@ -214,7 +214,8 @@ class SipManager {
             natPolicy?.resolveStunServer()
             natPolicy?.udpTurnTransportEnabled = true
             mCore.natPolicy = natPolicy
-            
+            mCore.setUserAgent(name: "LinPhone iOS", version: "0.0.2")
+            //mCore.userAgent = "ios-test";
             
             // Now let's add our objects to the Core
             mCore.addAuthInfo(info: authInfo)
