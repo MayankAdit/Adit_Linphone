@@ -46,7 +46,11 @@ class MyDialPadWidget extends State<DialPadWidget> {
     String password =
         "PMmHUJajDZ7YT9Wy"; //"6ZybYWXZGLqunqHB"; live  // PMmHUJajDZ7YT9Wy Beta
     String domain =
-        "pjsipbeta2.adit.com:65080"; //pjsip1.adit.com:65080 live  /// pjsipbeta2.adit.com:65080" beta
+        "pjsipbeta1.adit.com:65080"; //pjsip1.adit.com:65080 live  /// pjsipbeta2.adit.com:65080" beta
+
+    //65082 tcp
+    //65080 udp
+    //65081 tls
 
     ///pjsipbeta2.adit.com:65080
 

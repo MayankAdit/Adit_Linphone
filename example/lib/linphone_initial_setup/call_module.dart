@@ -99,6 +99,10 @@ class CallModule {
 
         _eventStreamController
             .add({'event': SipEvent.Hangup, 'body': event['body']});
+
+        print(event['body']["callId"]);
+
+        FlutterCallkitIncoming.endAllCalls();
         break;
       case 'Error':
         _eventStreamController

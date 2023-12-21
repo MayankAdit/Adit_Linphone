@@ -16,7 +16,7 @@ A new Flutter plugin project.
   # s.source           = { :git => 'https://gitlab.linphone.org/BC/public/podspec.git' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'linphone-sdk' , '5.2.109'
+  s.dependency 'linphone-sdk' , '5.2.110-pre.2+20cb52c5'
   # s.framework = 'linphone-sdk'
   s.platform = :ios, '11.0'
   
