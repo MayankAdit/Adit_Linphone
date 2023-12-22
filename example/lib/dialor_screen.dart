@@ -1,6 +1,8 @@
 import 'package:adit_lin_plugin_example/action_button.dart';
 import 'package:adit_lin_plugin_example/linphone_initial_setup/call_manager.dart';
 import 'package:adit_lin_plugin_example/linphone_initial_setup/model/sip_configuration.dart';
+import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
@@ -64,6 +66,7 @@ class MyDialPadWidget extends State<DialPadWidget> {
         .build();
     LinePhoneCallManager.callModule.initSipModule(sipConfiguration, context);
     getCallingEvent();
+    postPBXToken();
   }
 
   permission() async {
@@ -260,10 +263,10 @@ class MyDialPadWidget extends State<DialPadWidget> {
           // TODO: show screen calling in Flutter
           break;
         case Event.actionCallAccept:
-          LinePhoneCallManager.callModule.answer();
+          await LinePhoneCallManager.callModule.answer();
           break;
         case Event.actionCallDecline:
-          LinePhoneCallManager.callModule.reject();
+          await LinePhoneCallManager.callModule.reject();
 
           break;
         case Event.actionCallEnded:
@@ -303,5 +306,52 @@ class MyDialPadWidget extends State<DialPadWidget> {
           break;
       }
     });
+  }
+
+  var dio = Dio();
+
+  void postPBXToken() async {
+    _preferences = await SharedPreferences.getInstance();
+    String? token = await FirebaseMessaging.instance.getAPNSToken();
+    var voipToken = await FlutterCallkitIncoming.getDevicePushTokenVoIP();
+    print("token ${token}");
+    print("voipToken ${voipToken}");
+    //String token = _preferences.getString('voiptoken') ?? "";
+    String sipUser =
+        _preferences.getString('auth_user') ?? "021-021OwnerVMobile2713";
+    var data = {
+      "token": voipToken,
+      "devicetype": "ios",
+      "sipuser": sipUser,
+      // "environment": kDebugMode ? "debug" : "prod",
+      "environment": "debug",
+      "sessionAuthorization": "f3635738.b841.4602.9abd.01d3a3664f28",
+      //Add session ID
+      "dnd": "off",
+    };
+
+    var header = {
+      "accept-mobile-api": "aditapp-mobile-api",
+      "cookie":
+          "s%3ATwGK-ypFf36Hn4AK08gcfgJxbxYrc38Z.zXBSwNMcSD15V3ApSD7eEM171mY00OxKoZliYKBs9rk",
+      "authorization": "f3635738.b841.4602.9abd.01d3a3664f28",
+    };
+
+//https://betatelephony-manager.aditadv.xyz/pbx/proxyapi.php?key=ZNmuP3wMJqsXujtN
+    //var url = Uri.https('https://betamobileapi.adit.com', '/pbx/proxyapi.php?key=ZNmuP3wMJqsXujtN');
+    //   var url = Uri.parse("https://betatelephony-manager.aditadv.xyz/pbx/proxyapi.php?key=ZNmuP3wMJqsXujtN");
+    // print(url);
+    print(data);
+
+    var response = await dio.post(
+        'https://betamobileapi.adit.com/bridge/mobiletokensave',
+        data: data,
+        options: Options(headers: header));
+
+    if (response.statusCode == 200) {
+      print('Response body: ${response}');
+      print(response.data.toString());
+    }
+    print('Response status: ${response.statusCode}');
   }
 }

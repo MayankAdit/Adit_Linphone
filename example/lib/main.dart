@@ -2,10 +2,13 @@ import 'package:adit_lin_plugin_example/call_accept_reject.dart';
 import 'package:adit_lin_plugin_example/call_manager.dart';
 import 'package:adit_lin_plugin_example/call_screen.dart';
 import 'package:adit_lin_plugin_example/dialor_screen.dart';
+import 'package:adit_lin_plugin_example/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   CallManager();
   runApp(MyApp());
 }

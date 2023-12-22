@@ -33,11 +33,17 @@ dependencies:
   permission_handler: ^9.2.0
   fluttertoast: ^8.2.2
   uuid: ^4.0.0
+  firebase_messaging:
+  firebase_core:
+  firebase_messaging_platform_interface: 3.5.0
+  http: ^0.13.4
+  dio: ^5.4.0
 
 
 
 
 dependency_overrides:
+  firebase_core_platform_interface: 4.5.1
   # sip_ua:
   #   git:
   #     url: https://github.com/krunaladit/dart-sip-ua.git
