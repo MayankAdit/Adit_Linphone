@@ -58,15 +58,25 @@ class MyDialPadWidget extends State<DialPadWidget> {
 
     ///"pjsip1.adit.com:65080" live
 
-    var sipConfiguration = SipConfigurationBuilder(
-            extension: userName, domain: domain, password: password)
-        .setKeepAlive(true)
-        .setPort(65080)
-        .setTransport("Udp")
-        .build();
-    LinePhoneCallManager.callModule.initSipModule(sipConfiguration, context);
+    String state = "";
+
+    try {
+      state = await LinePhoneCallManager.callModule.getSipRegistrationState();
+      print("state ${state}");
+    } catch (e) {
+      print("Register Exception : ${e}");
+    }
+    if (state == "") {
+      var sipConfiguration = SipConfigurationBuilder(
+              extension: userName, domain: domain, password: password)
+          .setKeepAlive(true)
+          .setPort(65080)
+          .setTransport("Udp")
+          .build();
+      LinePhoneCallManager.callModule.initSipModule(sipConfiguration, context);
+      postPBXToken();
+    }
     getCallingEvent();
-    postPBXToken();
   }
 
   permission() async {
